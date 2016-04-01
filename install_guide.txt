@@ -1,0 +1,43 @@
+#homebrew install
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+#python3 and pip install
+brew install python3
+
+#mongodb
+brew update
+brew install mongodb
+
+#start mongodb
+mongod
+
+#create table
+mongo
+use 544pj
+
+#add user and psw
+use admin
+db.createUser(
+  {
+    user: "544admin",
+    pwd: "123456",
+    roles: [ { role: "userAdmin", db: "544pj" } ]
+  }
+)
+
+#drop database
+db.runCommand( { dropDatabase: 1 } )
+
+#uninstall mongodb
+    # See if mongo is in the launch/startup list
+    launchctl list | grep mongo
+
+    # Remove mongodb from the launch/startup
+    launchctl remove homebrew.mxcl.mongodb
+
+    # Kill the mongod process just in case it's running
+    pkill -f mongod
+
+    # Now you can safely remove mongodb using Homebrew
+    brew uninstall mongodb
+
