@@ -2,7 +2,7 @@
 
 from flask.ext.script import Manager, Server
 from app import create_app
-from app.analyzer.data_handler import hashtag_handler, microblog_handler, emoticon_handler
+from app.analyzer.data_handler import hashtag_data_handler, microblog_data_handler, emoticon_data_handler
 from app.models import Hashtag, Microblog, Emoticon
 
 app = create_app()
@@ -17,7 +17,7 @@ hashtag command operators
 """
 @manager.command
 def add_hashtag():
-    hashtags = hashtag_handler()
+    hashtags = hashtag_data_handler()
     Hashtag.objects.insert(hashtags)
 
 @manager.command
@@ -43,7 +43,7 @@ emoticon command operators
 
 @manager.command
 def add_emoticon():
-    emoticons = emoticon_handler()
+    emoticons = emoticon_data_handler()
     Emoticon.objects.insert(emoticons)
 
 @manager.command
@@ -68,7 +68,7 @@ microblog command operators
 """
 @manager.command
 def add_microblog():
-    microblogs = microblog_handler()
+    microblogs = microblog_data_handler()
     Microblog.objects.insert(microblogs)
 
 @manager.command

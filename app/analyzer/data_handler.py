@@ -2,8 +2,12 @@
 
 from app.models import Hashtag, Emoticon
 
+"""
 
-def hashtag_handler():
+hashtag data handler
+
+"""
+def hashtag_data_handler():
 
     hashtags = []
 
@@ -13,8 +17,12 @@ def hashtag_handler():
 
     return hashtags
 
+"""
 
-def emoticon_handler():
+emoticon data handler
+
+"""
+def emoticon_data_handler():
 
     emoticons = []
 
@@ -24,8 +32,12 @@ def emoticon_handler():
 
     return emoticons
 
+"""
 
-def microblog_handler():
+microblog data handler
+
+"""
+def microblog_data_handler():
 
     microblogs = []
 
