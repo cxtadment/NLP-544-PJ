@@ -23,14 +23,17 @@ class Emoticon(db.Document):
         return "name: %s, url: %s, polarity: %s, sentiment: %s" % (self.name, self.url, self.polarity, self.sentiment)
 
 
+#type: 0 for training, 1 for testing
 class Microblog(db.Document):
     microblogId = db.StringField(required=True)
     text = db.StringField(required=True)
     polarity = db.IntField(required=True)
+    type = db.IntField(required=True)
+    topic  = db.StringField()
     sentiment = db.StringField()
 
     def __str__(self):
-        return "microblogId: %s, text: %s, polarity: %s, sentiment: %s" % (self.microblogId, self.text, self.polarity, self.sentiment)
+        return "microblogId: %s, text: %s, polarity: %s, type: %s, topic: %s, sentiment: %s" % (self.microblogId, self.text, self.polarity, self.type, self.topic, self.sentiment)
 
 
 class Result(db.Document):

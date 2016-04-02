@@ -67,8 +67,8 @@ microblog command operators
 
 """
 @manager.command
-def add_microblog():
-    microblogs = microblog_data_handler()
+def add_microblog(type):
+    microblogs = microblog_data_handler(type)
     Microblog.objects.insert(microblogs)
 
 @manager.command
@@ -76,6 +76,12 @@ def delete_microblog_by_id(microblog_id):
     microblog = Microblog.objects(microblogId=microblog_id).first()
     if microblog:
         microblog.delete()
+
+@manager.command
+def delete_all_microblogs_by_type(type):
+    microblogs = Microblog.objects(microblogId=type)
+    if microblogs:
+        microblogs.delete()
 
 @manager.command
 def delete_all_microblogs():
