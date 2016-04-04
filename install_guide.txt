@@ -46,3 +46,12 @@ db.runCommand( { dropDatabase: 1 } )
     # Now you can safely remove mongodb using Homebrew
     brew uninstall mongodb
 
+
+$ git checkout -b feature_branch_name
+
+$ git push -u origin feature_branch_name
+
+find . | \
+  grep -E "(__pycache__|\.pyc$)" | \
+  xargs rm -rf
+
