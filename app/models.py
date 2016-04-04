@@ -28,7 +28,7 @@ class Microblog(db.Document):
     microblogId = db.StringField(required=True)
     text = db.StringField(required=True)
     polarity = db.IntField(required=True)
-    type = db.IntField(required=True)
+    microblogType = db.IntField(required=True)
     topic  = db.StringField()
     sentiment = db.StringField()
 
