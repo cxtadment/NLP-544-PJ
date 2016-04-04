@@ -33,7 +33,7 @@ class Microblog(db.Document):
     sentiment = db.StringField()
 
     def __str__(self):
-        return "microblogId: %s, text: %s, polarity: %s, type: %s, topic: %s, sentiment: %s" % (self.microblogId, self.text, self.polarity, self.type, self.topic, self.sentiment)
+        return "microblogId: %s, text: %s, polarity: %s, microblogType: %s, topic: %s, sentiment: %s" % (self.microblogId, self.text, self.polarity, self.microblogType, self.topic, self.sentiment)
 
 
 class Result(db.Document):
