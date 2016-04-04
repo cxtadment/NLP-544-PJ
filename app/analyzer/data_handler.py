@@ -37,14 +37,14 @@ def emoticon_data_handler():
 microblog data handler
 
 """
-def microblog_data_handler(type):
+def microblog_data_handler(micorblog_type):
 
     microblogs = []
 
     #do you code here
-    if type == "training":
+    if microblog_type == "training":
         single_microblog = Hashtag(microblogId="***", text="***", polarity=1, type=0, topic="***", sentiment="***")
-    else:
+    elif microblog_type == "testing":
         single_microblog = Hashtag(microblogId="***", text="***", polarity=1, type=1, topic="***", sentiment="***")
 
     microblogs.append(single_microblog)
