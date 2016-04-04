@@ -1,6 +1,6 @@
 #coding=utf-8
 
-from app.models import Hashtag, Emoticon
+from app.models import Hashtag, Emoticon, Microblog
 
 """
 
@@ -43,9 +43,9 @@ def microblog_data_handler(microblog_type):
 
     #do you code here
     if microblog_type == "training":
-        single_microblog = Hashtag(microblogId="***", text="***", polarity=1, microblogType=0, topic="***", sentiment="***")
+        single_microblog = Microblog(microblogId="***", text="***", polarity=1, microblogType=0, topic="***", sentiment="***")
     elif microblog_type == "testing":
-        single_microblog = Hashtag(microblogId="***", text="***", polarity=1, microblogType=1, topic="***", sentiment="***")
+        single_microblog = Microblog(microblogId="233", text="dasdas", polarity=1, microblogType=1, topic="*ddd", sentiment="dsadas")
 
     microblogs.append(single_microblog)
 
