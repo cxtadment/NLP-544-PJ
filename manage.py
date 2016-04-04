@@ -67,8 +67,8 @@ microblog command operators
 
 """
 @manager.command
-def add_microblog(type):
-    microblogs = microblog_data_handler(type)
+def add_microblog(microblog_type):
+    microblogs = microblog_data_handler(microblog_type)
     Microblog.objects.insert(microblogs)
 
 @manager.command
