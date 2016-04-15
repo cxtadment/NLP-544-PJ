@@ -45,3 +45,7 @@ class Result(db.Document):
 
     def __str__(self):
         return "microblogId: %s, posPercent: %s, negPercent: %s, polarity: %s, sentiment: %s" % (self.microblogId, self.posPercent, self.negPercent, self.polarity, self.sentiment)
+
+class TestResult(db.Document):
+    classifier = db.StringField()
+    probability = db.FloatField()
