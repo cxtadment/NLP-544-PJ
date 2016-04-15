@@ -1,7 +1,7 @@
 #coding=utf-8
 
 from app.models import Hashtag, Emoticon, Microblog
-
+from app.analyzer.data_filter import readWeibo
 """
 
 hashtag data handler
@@ -38,16 +38,18 @@ microblog data handler
 
 """
 def microblog_data_handler(microblog_type):
-
-    microblogs = []
-
-    #do you code here
-    if microblog_type == "training":
-        single_microblog = Microblog(microblogId="***", text="***", polarity=1, microblogType=0, topic="***", sentiment="***")
-    elif microblog_type == "testing":
-        single_microblog = Microblog(microblogId="233", text="dasdas", polarity=1, microblogType=1, topic="*ddd", sentiment="dsadas")
-
-    microblogs.append(single_microblog)
-
-    return microblogs
+    result=[]
+    microblogs = readWeibo()
+    for polarity in microblogs:
+        print(polarity)
+        microblog_list=microblogs[polarity]
+        for i in range(0, len(microblog_list)):
+            microblog=microblog_list[i]
+            #do you code here
+            if microblog_type == "training":
+                single_microblog = Microblog(microblogId=microblog[0], text=microblog[1], polarity=microblog[2], microblogType=0, topic="", sentiment="")
+            elif microblog_type == "testing":
+                single_microblog = Microblog(microblogId=microblog[0], text=microblog[1], polarity=microblog[2], microblogType=1, topic="*ddd", sentiment="dsadas")
+            result.append(single_microblog)
+    return result
 

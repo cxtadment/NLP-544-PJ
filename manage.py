@@ -89,7 +89,7 @@ def delete_all_microblogs():
 
 @manager.command
 def print_microblog():
-    print(Microblog.objects)
+    print(len(Microblog.objects))
 
 
 if __name__ == '__main__':
