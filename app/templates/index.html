@@ -5,6 +5,10 @@
     <title></title>
 </head>
 <body>
-<p>{{ hashtags }}</p>
+<ul>
+{% for testResult in testResults %}
+    <li>{{ testResult.classifier }}:  {{ testResult.probability }}</li>
+{% endfor %}
+</ul>
 </body>
 </html>

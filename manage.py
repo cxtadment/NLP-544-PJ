@@ -2,6 +2,7 @@
 
 from flask.ext.script import Manager, Server
 from app import create_app
+from app.analyzer.classifiers.classifier_handler import module_build, classify
 from app.analyzer.data_handler import hashtag_data_handler, microblog_data_handler, emoticon_data_handler
 from app.models import Hashtag, Microblog, Emoticon
 
@@ -90,6 +91,11 @@ def delete_all_microblogs():
 @manager.command
 def print_microblog():
     print(Microblog.objects)
+
+@manager.command
+def test_classifier():
+    module_build()
+    classify()
 
 
 if __name__ == '__main__':
