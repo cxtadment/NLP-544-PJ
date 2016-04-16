@@ -3,9 +3,12 @@
 import re
 import codecs
 import sys
+import os
 
 # start of tokenization
 # convert chinese punctuation to engnish version
+
+INPUT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/resources/data/SIGHAN8-Task2-Corpus/'
 
 
 def convertPun(content):
@@ -66,10 +69,10 @@ def removeForward(content):
 def readWeibo():
     # read annotation file to get weibo id
     annotation_file = open(
-        '/Users/sx/Desktop/CSCI544/FinalProject/Weibo/Dataset/fuzhou/SIGHAN8-Task2-Corpus/Annotation.txt', 'r')
+        INPUT_PATH + 'Annotation.txt', 'r')
     pos_list = []
     neg_list = []
-    neu_list = []
+    # neu_list = []
     for line in annotation_file:
         # remove '\n' at the end of line
         line = line.rstrip()
@@ -80,17 +83,17 @@ def readWeibo():
             pos_list.append(wid)
         elif num == '-1':
             neg_list.append(wid)
-        elif num == '0':
-            neu_list.append(wid)
+        # elif num == '0':
+        #     neu_list.append(wid)
     annotation_file.close()
     # read message file to get weibo content
 
     pos_results = []
     neg_results = []
-    neu_results = []
+    # neu_results = []
     weibo_dict = {}
     message_file = codecs.open(
-        '/Users/sx/Desktop/CSCI544/FinalProject/Weibo/Dataset/fuzhou/SIGHAN8-Task2-Corpus/Message.txt', 'r', 'utf-8')
+        INPUT_PATH + 'Message.txt', 'r', 'utf-8')
     count = 0
     for line in message_file:
         # remove '\n' at the end of line
@@ -123,12 +126,12 @@ def readWeibo():
         elif weibo_id in neg_list:
             cur_list.append("-1")
             neg_results.append(cur_list)
-        else:
-            cur_list.append("0")
-            neu_results.append(cur_list)
+        # else:
+        #     cur_list.append("0")
+        #     neu_results.append(cur_list)
     weibo_dict['positive'] = pos_results
     weibo_dict['negative'] = neg_results
-    weibo_dict['neutral'] = neu_results
+    # weibo_dict['neutral'] = neu_results
     return weibo_dict
 
 

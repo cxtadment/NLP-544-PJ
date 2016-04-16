@@ -3,7 +3,7 @@ import pickle
 from nltk.classify.scikitlearn import SklearnClassifier
 from sklearn.naive_bayes import MultinomialNB, BernoulliNB
 from sklearn.linear_model import LogisticRegression, Perceptron
-from sklearn.svm import SVC, LinearSVC, NuSVC
+from sklearn.svm import LinearSVC, NuSVC
 
 
 def write_module(classifer, output_path):
@@ -33,11 +33,6 @@ def logistic_regression_classifier(train_set, out_path):
 
 def perceptron_classifier(train_set, output_path):
     classifier = SklearnClassifier(Perceptron()).train(train_set)
-    write_module(classifier, output_path)
-
-
-def origin_svc_classifier(train_set, output_path):
-    classifier = SklearnClassifier(SVC()).train(train_set)
     write_module(classifier, output_path)
 
 

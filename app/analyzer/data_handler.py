@@ -1,4 +1,5 @@
 # coding=utf-8
+from app.analyzer.feature_extractor import FeatureExtractor
 
 from app.models import Hashtag, Emoticon, Microblog
 from app.analyzer.data_filter import readWeibo
@@ -45,20 +46,23 @@ microblog data handler
 
 
 def microblog_data_handler(microblog_type):
+
+    microblog_type = 0 if microblog_type == 'training' else 1 if microblog_type == 'testing' else None
     result = []
     microblogs = readWeibo()
+    feature_extractor = FeatureExtractor()
     for polarity in microblogs:
-        print(polarity)
         microblog_list = microblogs[polarity]
-        for i in range(0, len(microblog_list)):
-            microblog = microblog_list[i]
-            #do you code here
-            if microblog_type == "training":
-                single_microblog = Microblog(microblogId=microblog[0], text=microblog[1], polarity=microblog[2],
-                                             microblogType=0, topic="", sentiment="")
-            elif microblog_type == "testing":
-                single_microblog = Microblog(microblogId=microblog[0], text=microblog[1], polarity=microblog[2],
-                                             microblogType=1, topic="*ddd", sentiment="dsadas")
+        for microblog in microblog_list:
+
+            #feature extractor
+            microblogId, microblog_text, polarity = microblog[0], microblog[1], microblog[2]
+            posCount, negCount = feature_extractor.polarity_count(microblog_text)
+            words, taggings = feature_extractor.pos_tagging(microblog_text)
+
+            single_microblog = Microblog(microblogId=microblogId, text=microblog_text, polarity=polarity, negCount=negCount,
+                                         posCount=posCount, words=words, taggings=taggings, microblogType=microblog_type, topic='', sentiment='')
             result.append(single_microblog)
+
     return result
 

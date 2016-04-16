@@ -31,6 +31,10 @@ class Microblog(db.Document):
     microblogType = db.IntField(required=True)
     topic  = db.StringField()
     sentiment = db.StringField()
+    negCount = db.IntField()
+    posCount = db.IntField()
+    taggings = db.ListField(db.StringField())
+    words = db.ListField(db.StringField())
 
     def __str__(self):
         return "microblogId: %s, text: %s, polarity: %s, microblogType: %s, topic: %s, sentiment: %s" % (self.microblogId, self.text, self.polarity, self.microblogType, self.topic, self.sentiment)
@@ -49,3 +53,7 @@ class Result(db.Document):
 class TestResult(db.Document):
     classifier = db.StringField()
     probability = db.FloatField()
+
+
+class TestDict(db.Document):
+    thisdict = db.DictField()
