@@ -52,7 +52,20 @@ class Result(db.Document):
 
 class TestResult(db.Document):
     classifier = db.StringField()
-    probability = db.FloatField()
+    accuracy = db.FloatField()
+    precision = db.FloatField()
+    recall = db.FloatField()
+    pos_count = db.IntField()
+    neg_count = db.IntField()
+    f_score = db.FloatField()
+    pos_precision = db.FloatField()
+    pos_recall = db.FloatField()
+    pos_f_score = db.FloatField()
+    neg_precision = db.FloatField()
+    neg_recall = db.FloatField()
+    neg_f_score = db.FloatField()
+
+
 
 
 class TestDict(db.Document):

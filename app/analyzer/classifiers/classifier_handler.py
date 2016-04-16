@@ -1,14 +1,16 @@
 import os
 import nltk
-from nltk.corpus import movie_reviews
+from nltk.metrics import precision, recall, f_measure
 import pickle
 from app.analyzer.classifiers.classifiers import origin_nb_classifier, multinomial_nb_classifer, bernoulli_nb_classifer, \
     logistic_regression_classifier, perceptron_classifier, linearSVC_classifier, nuSVC_classifier
 from app.analyzer.classifiers.vote_handler import VoteClassifier
 from app.models import TestResult, Microblog
+from collections import defaultdict
+import random
 
 
-CURRENT_DIR_PATH = os.path.dirname(os.path.dirname(__file__)) + '/modules/'
+CURRENT_DIR_PATH = os.path.dirname(os.path.dirname(__file__)) + '/pickles/'
 
 WORDS_FEATURES_PATH = CURRENT_DIR_PATH + '/wordsFeature.pickle'
 
@@ -70,6 +72,8 @@ def get_feature_set(microblogType):
 
     feature_sets = [(feature_filter(microblog.words, words_features), microblog.polarity) for microblog in microblogs]
 
+    random.shuffle(feature_sets)
+
     return feature_sets
 
 
@@ -92,10 +96,42 @@ def module_build():
     nuSVC_classifier(train_set, NU_SVC_PATH)
 
 
-def save_testing_result(classifier, test_set, classifier_name):
-    precision = (nltk.classify.accuracy(classifier, test_set)) * 100
-    print(classifier_name + ' precision is: ', precision)
-    testResult = TestResult(classifier=classifier_name, probability=precision)
+def overall_score_calculator(pos, neg, pos_count, neg_count):
+    return float((pos*pos_count + neg*neg_count) / (pos_count + neg_count))
+
+
+def sub_score_calculator(label, refsets, testsets):
+    res_precision = precision(refsets[label], testsets[label])
+    res_recall = recall(refsets[label], testsets[label])
+    res_f_score = f_measure(refsets[label], testsets[label])
+
+    return res_precision, res_recall, res_f_score
+
+def save_testing_result(classifier, test_feats, classifier_name):
+
+    refsets = defaultdict(set)
+    testsets = defaultdict(set)
+
+    for i, (feats, label) in enumerate(test_feats):
+        refsets[label].add(i)
+        observed = classifier.classify(feats)
+        testsets[observed].add(i)
+
+    pos_count, neg_count = len(refsets[1]), len(refsets[-1])
+    pos_precision, pos_recall, pos_f_score = sub_score_calculator(1, refsets, testsets)
+    neg_precision, neg_recall, neg_f_score = sub_score_calculator(-1, refsets, testsets)
+    # print(pos_precision, neg_precision)
+    # exit()
+    overall_precision = overall_score_calculator(pos_precision, neg_precision, pos_count, neg_count)
+    overall_recall = overall_score_calculator(pos_recall, neg_recall, pos_count, neg_count)
+    overall_f_score = overall_score_calculator(pos_f_score, neg_f_score, pos_count, neg_count)
+
+    accuracy = (nltk.classify.accuracy(classifier, test_feats)) * 100
+
+    testResult = TestResult(classifier=classifier_name, accuracy=accuracy, pos_count=pos_count, neg_count=neg_count,
+                            pos_precision=pos_precision, pos_recall=pos_recall, pos_f_score=pos_f_score,
+                            neg_precision=neg_precision, neg_recall=neg_recall, neg_f_score=neg_f_score,
+                            precision=overall_precision, recall=overall_recall, f_score=overall_f_score)
     testResult.save()
 
 
