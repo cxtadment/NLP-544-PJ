@@ -137,19 +137,28 @@ def save_testing_result(classifier, test_feats, classifier_name):
 def classify_testing():
 
     test_set = get_feature_set('testing')
-    random.shuffle(test_set)
-    test_set = test_set[2000:]
+    # random.shuffle(test_set)
+    # test_set = test_set[2000:]
 
-    all_classifiers = []
     for (name, input_path) in classifier_path_list:
         with open(input_path, 'rb') as input_classifier:
             classifier = pickle.load(input_classifier)
-            all_classifiers.append(classifier)
             save_testing_result(classifier, test_set, name)
             # classifier.show_most_informative_features(15)
     # voted_classifier = VoteClassifier(all_classifiers)
     # save_testing_result(voted_classifier, test_set, 'All in one classifier')
 
+
+class ApiClassifier:
+
+    def __init__(self):
+        self.all_classifiers = []
+        for (name, input_path) in classifier_path_list:
+            with open(input_path, 'rb') as input_classifier:
+                classifier = pickle.load(input_classifier)
+                self.all_classifiers.append(classifier)
+
+    # def classify(self, microblogs):
 
 # def classify_data_from_api(data):
 #     test_set = None

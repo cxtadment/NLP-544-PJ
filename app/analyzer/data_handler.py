@@ -47,13 +47,14 @@ microblog data handler
 """
 
 
+
 def microblog_data_handler(microblog_type):
 
     microblogs = read_and_filter_data(microblog_type)
 
-    feature_extractor = FeatureExtractor()
     result = []
 
+    feature_extractor = FeatureExtractor()
     for polarity in microblogs:
         microblog_list = microblogs[polarity]
         for microblog in microblog_list:
