@@ -27,8 +27,8 @@ class Emoticon(db.Document):
 class Microblog(db.Document):
     microblogId = db.StringField(required=True)
     text = db.StringField(required=True)
-    polarity = db.IntField(required=True)
-    microblogType = db.IntField(required=True)
+    microblogType = db.StringField(required=True)
+    polarity = db.StringField(required=True)
     topic  = db.StringField()
     sentiment = db.StringField()
     negCount = db.IntField()
@@ -57,6 +57,7 @@ class TestResult(db.Document):
     recall = db.FloatField()
     pos_count = db.IntField()
     neg_count = db.IntField()
+    neu_count = db.IntField()
     f_score = db.FloatField()
     pos_precision = db.FloatField()
     pos_recall = db.FloatField()
@@ -64,6 +65,9 @@ class TestResult(db.Document):
     neg_precision = db.FloatField()
     neg_recall = db.FloatField()
     neg_f_score = db.FloatField()
+    neu_precision = db.FloatField()
+    neu_recall = db.FloatField()
+    neu_f_score = db.FloatField()
 
 
 
