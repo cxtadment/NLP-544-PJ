@@ -3,9 +3,9 @@ import pickle
 from nltk.classify.scikitlearn import SklearnClassifier
 from sklearn.naive_bayes import MultinomialNB, BernoulliNB
 from sklearn.linear_model import LogisticRegression, Perceptron
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import LinearSVC, NuSVC
 from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.feature_selection import SelectKBest, chi2
 from sklearn.pipeline import Pipeline
 
 
@@ -48,6 +48,11 @@ def linearSVC_classifier(train_set, output_path):
 
 def nuSVC_classifier(train_set, output_path):
     classifier = SklearnClassifier(NuSVC()).train(train_set)
+    write_module(classifier, output_path)
+
+
+def random_forest_classifier(train_set, output_path):
+    classifier = SklearnClassifier(RandomForestClassifier()).train(train_set)
     write_module(classifier, output_path)
 
 
