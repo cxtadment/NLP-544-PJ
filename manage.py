@@ -96,8 +96,8 @@ def print_microblog():
 
 @manager.command
 def test_classifier():
-    # module_build()
-    # TestResult.objects.delete()
+    module_build()
+    TestResult.objects.delete()
     classify_testing()
 
 @manager.command
