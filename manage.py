@@ -6,6 +6,7 @@ from app.analyzer.classifiers.classifier_handler import module_build, classify_t
 from app.analyzer.data_handler import hashtag_data_handler, microblog_data_handler, emoticon_data_handler
 from app.analyzer.feature_extractor import FeatureExtractor
 from app.models import Hashtag, Microblog, Emoticon, TestDict, TestResult
+from app.analyzer.sinaApi_handler import SinaAPIRequest
 
 app = create_app()
 manager = Manager(app)
@@ -137,6 +138,11 @@ def test_feature():
     single_microblog = Microblog(microblogId=microblogId, text=microblog_text, polarity=polarity, negCount=negCount,
                                              posCount=posCount, words=words, taggings=taggings, microblogType=1, topic=None, sentiment=None)
     single_microblog.save()
+
+@manager.command    
+def test_api(polarity):
+    api_handler = SinaAPIRequest()
+    api_handler.getPolarityWeibo(polarity)
 
 if __name__ == '__main__':
     manager.run()
