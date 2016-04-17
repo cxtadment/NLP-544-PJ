@@ -3,7 +3,7 @@ import nltk
 from nltk.metrics import precision, recall, f_measure
 import pickle
 from app.analyzer.classifiers.classifiers import origin_nb_classifier, multinomial_nb_classifer, bernoulli_nb_classifer, \
-    logistic_regression_classifier, perceptron_classifier, linearSVC_classifier, nuSVC_classifier
+    logistic_regression_classifier, perceptron_classifier, linearSVC_classifier
 from app.analyzer.classifiers.vote_handler import VoteClassifier
 from app.models import TestResult, Microblog
 from collections import defaultdict
@@ -23,8 +23,7 @@ LINEAR_SVC_PATH = CURRENT_DIR_PATH + 'linearSVC.pickle'
 NU_SVC_PATH = CURRENT_DIR_PATH + 'nuSVC.pickle'
 
 classifier_path_list = [('origin_nb', ORIGIN_NB_PATH), ('multinomial_nb', MULTINOMIAL_NB_PATH), ('bernoulli_nb', BERNOULLI_NB_PATH),
-                        ('logistic_regression', LOGISTIC_REGRESSION_PATH), ('perceptron', PERCEPTRON_PATH), ('linear_svc', LINEAR_SVC_PATH),
-                        ('nu_svc', NU_SVC_PATH)]
+                        ('logistic_regression', LOGISTIC_REGRESSION_PATH), ('perceptron', PERCEPTRON_PATH), ('linear_svc', LINEAR_SVC_PATH)]
 
 TAGGING_CHOOSE = set(['nr', 'n', 'ul'])
 
@@ -93,7 +92,7 @@ def module_build():
 
     #svm classifiers
     linearSVC_classifier(train_set, LINEAR_SVC_PATH)
-    nuSVC_classifier(train_set, NU_SVC_PATH)
+    # nuSVC_classifier(train_set, NU_SVC_PATH)
 
 
 def overall_score_calculator(pos, neg, pos_count, neg_count):

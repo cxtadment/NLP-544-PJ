@@ -70,6 +70,7 @@ microblog command operators
 """
 @manager.command
 def add_microblog(microblog_type):
+    Microblog.objects.delete()
     microblogs = microblog_data_handler(microblog_type)
     print(len(microblogs))
     Microblog.objects.insert(microblogs)
@@ -96,8 +97,8 @@ def print_microblog():
 
 @manager.command
 def test_classifier():
-    # module_build()
-    # TestResult.objects.delete()
+    module_build()
+    TestResult.objects.delete()
     classify_testing()
 
 @manager.command
