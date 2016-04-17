@@ -2,10 +2,13 @@
 import jieba
 import os
 import jieba.posseg as pseg
+import re
 
-CURRENT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/resources/sentiment_zh/'
-INPUT_POS_PATH = CURRENT_DIR_PATH + 'combinePositive.txt'
-INPUT_NEG_PATH = CURRENT_DIR_PATH + 'combineNegative.txt'
+CURRENT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/resources/'
+INPUT_POS_PATH = CURRENT_DIR_PATH + 'sentiment_zh/combinePositive.txt'
+INPUT_NEG_PATH = CURRENT_DIR_PATH + 'sentiment_zh/combineNegative.txt'
+STOPWORDS_PATH = CURRENT_DIR_PATH + 'segment_filter/chinese_stopwords.txt'
+TOPICS_PATH = CURRENT_DIR_PATH + 'segment_filter/topics.txt'
 ESCAPE_WORDS = ['不']
 
 class FeatureExtractor:
@@ -15,6 +18,14 @@ class FeatureExtractor:
             self.posDic = set([line.rstrip() for line in input_pos_doc])
         with open(INPUT_NEG_PATH, 'r') as input_neg_doc:
             self.negDic = set([line.rstrip() for line in input_neg_doc])
+        with open(STOPWORDS_PATH, 'r') as stopwords_doc:
+            self.stopwords = set([line.rstrip() for line in stopwords_doc])
+        with open(TOPICS_PATH, 'r') as topics_doc:
+            self.topics=set()
+            for line in topics_doc:
+                segment_list=list(jieba.cut(line.rstrip()))
+                for segment in segment_list:
+                    self.topics.add(segment)     
 
     """
 
@@ -42,6 +53,23 @@ class FeatureExtractor:
 
     """
 
+    filter segment result
+
+    """
+    def seg_filter(self, word, tagging):
+        # filter stop words including punctuation
+        if word in self.stopwords:
+            return False
+        # filter element containing number
+        if re.match('^(?=.*\\d)', word):
+            return False
+        # if the word is in the topics
+        if word in self.topics:
+            return False 
+        return True 
+
+    """
+
     use jieba to do pos tagging
 
     """
@@ -52,7 +80,13 @@ class FeatureExtractor:
 
         words, taggings = [], []
         for word, tagging in words_taggings:
-            words.append(word)
-            taggings.append(tagging)
-
+            if self.seg_filter(word, tagging):
+                words.append(word)
+                taggings.append(tagging)
         return words, taggings
+
+
+
+        
+
+

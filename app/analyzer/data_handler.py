@@ -1,8 +1,9 @@
 # coding=utf-8
 from app.analyzer.feature_extractor import FeatureExtractor
+from app.analyzer.sinaApi_handler import get_microblogs_by_keywords
 
 from app.models import Hashtag, Emoticon, Microblog
-from app.analyzer.data_filter import read_and_filter_data
+from app.analyzer.data_filter import read_and_filter_data, text_filters
 import os
 
 
@@ -47,6 +48,20 @@ microblog data handler
 """
 
 
+def api_microblog_data_handler(keyword):
+
+    microblogs_text = get_microblogs_by_keywords(keyword)
+
+    feature_extractor = FeatureExtractor()
+    result = []
+    for text in microblogs_text:
+        text = text_filters(text)
+        words, taggings = feature_extractor.pos_tagging(text)
+        result.append((text, words, taggings))
+
+    return result
+
+
 
 def microblog_data_handler(microblog_type):
 
@@ -63,7 +78,7 @@ def microblog_data_handler(microblog_type):
             microblogId, microblog_text, polarity = microblog[0], microblog[1], microblog[2]
             posCount, negCount = feature_extractor.polarity_count(microblog_text)
             words, taggings = feature_extractor.pos_tagging(microblog_text)
-
+            
             single_microblog = Microblog(microblogId=microblogId, text=microblog_text, polarity=polarity, negCount=negCount,
                                          posCount=posCount, words=words, taggings=taggings, microblogType=microblog_type, topic='', sentiment='')
             result.append(single_microblog)

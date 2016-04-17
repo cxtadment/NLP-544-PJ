@@ -5,7 +5,7 @@ import pickle
 from app.analyzer.classifiers.classifiers import origin_nb_classifier, multinomial_nb_classifer, bernoulli_nb_classifer, \
     logistic_regression_classifier, perceptron_classifier, linearSVC_classifier
 from app.analyzer.classifiers.vote_handler import VoteClassifier
-from app.models import TestResult, Microblog
+from app.models import TestResult, Microblog, SearchResult
 from collections import defaultdict
 import random
 
@@ -157,8 +157,20 @@ class ApiClassifier:
             with open(input_path, 'rb') as input_classifier:
                 classifier = pickle.load(input_classifier)
                 self.all_classifiers.append(classifier)
+        self.vote_classifier = VoteClassifier(self.all_classifiers)
 
-    # def classify(self, microblogs):
+    def classify(self, microblogs):
+
+        searchResults = []
+        words_features = get_words_features_pickle()
+        for (text, words, taggings) in microblogs:
+            test_features = feature_filter(words, words_features)
+            polarity = self.vote_classifier.classify(test_features)
+            confidence = round(self.vote_classifier.confidence(test_features)*100, 2)
+            single_searchResult = SearchResult(text=text, words=words, polarity=polarity, confidence=confidence)
+            searchResults.append(single_searchResult)
+
+        return searchResults
 
 # def classify_data_from_api(data):
 #     test_set = None

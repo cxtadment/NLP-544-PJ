@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<!--<form data-toggle="validator" role="form" id="myform">-->
+<div class="input-group">
+    <input type="text" class="form-control search-input" placeholder="Search microblogs by keyword" required>
+
+    <div class="input-group-btn">
+        <button class="btn btn-default search-keywords"><i class="glyphicon glyphicon-search"></i></button>
+    </div>
+</div>
+<p class="validation">Please fill out a keyword</p>
+<!--</form>-->
+
+<div class="list-group result-display">
+  <a href="#" class="list-group-item list-display">
+    <div>Microblog Content:</div>
+    <div>Polarity: </div>
+    <div>Confidence: </div>
+    <div>Keywords: </div>
+  </a>
+  <a href="#" class="list-group-item list-display">Dapibus ac facilisis in</a>
+  <a href="#" class="list-group-item list-display">Morbi leo risus</a>
+  <a href="#" class="list-group-item list-display">Porta ac consectetur ac</a>
+  <a href="#" class="list-group-item list-display">Vestibulum at eros</a>
+</div>
+
+{% endblock %}
