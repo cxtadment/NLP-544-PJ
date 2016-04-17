@@ -69,10 +69,26 @@ microblog command operators
 
 """
 @manager.command
-def add_microblog(microblog_type):
-    microblogs = microblog_data_handler(microblog_type)
+def add_microblog():
+    Microblog.objects.delete()
+    microblogs = microblog_data_handler('training')
     print(len(microblogs))
     Microblog.objects.insert(microblogs)
+    microblogs = microblog_data_handler('testing')
+    print(len(microblogs))
+    Microblog.objects.insert(microblogs)
+
+@manager.command
+def complete_microblog():
+    microblogs = Microblog.objects(microblogType='training')
+    print(len(microblogs))
+    # new_microblogs = []
+    # for microblog in microblogs:
+    #     newone = Microblog(microblogId=microblog.microblogId, text=microblog.text, polarity=microblog.polarity, negCount=microblog.negCount,
+    #                          posCount=microblog.posCount, words=microblog.words, taggings=microblog.taggings, microblogType=microblog.microblogType, topic='', sentiment='')
+    #     new_microblogs.append(newone)
+    # Microblog.objects.insert(new_microblogs)
+
 
 @manager.command
 def delete_microblog_by_id(microblog_id):
@@ -93,6 +109,7 @@ def delete_all_microblogs():
 @manager.command
 def print_microblog():
     print(len(Microblog.objects))
+
 
 @manager.command
 def test_classifier():

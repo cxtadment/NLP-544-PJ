@@ -26,7 +26,8 @@ def multinomial_nb_classifer(train_set, output_path):
 
 
 def bernoulli_nb_classifer(train_set, output_path):
-    classifier = SklearnClassifier(BernoulliNB()).train(train_set)
+    pipeline = Pipeline([('tfidf', TfidfTransformer()), ('nb', BernoulliNB())])
+    classifier = SklearnClassifier(pipeline).train(train_set)
     write_module(classifier, output_path)
 
 

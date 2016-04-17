@@ -8,7 +8,8 @@ import os
 # start of tokenization
 # convert chinese punctuation to engnish version
 
-INPUT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/resources/data/SIGHAN8-Task2-Corpus/'
+TRAINING_INPUT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/resources/data/SIGHAN8-Task2-Corpus-Release/'
+TESTING_INPUT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/resources/data/SIGHAN8-Task2-Corpus/'
 
 
 def convertPun(content):
@@ -38,7 +39,7 @@ def removeTopic(content):
     return content
 
 
-# remove content in (), like (分享自 @Flyme阅读)
+# remove content in (), like
 def removeBracket(content):
     content = content.replace('（', '(')
     content = content.replace('）', ')')
@@ -65,73 +66,79 @@ def removeForward(content):
     return content
 
 
-# end of tokenization
-def readWeibo():
-    # read annotation file to get weibo id
-    annotation_file = open(
-        INPUT_PATH + 'Annotation.txt', 'r')
-    pos_list = []
-    neg_list = []
-    # neu_list = []
-    for line in annotation_file:
-        # remove '\n' at the end of line
-        line = line.rstrip()
-        line_list = line.split('	')
-        wid = line_list[3]
-        num = line_list[4]
-        if num == '1':
-            pos_list.append(wid)
-        elif num == '-1':
-            neg_list.append(wid)
-        # elif num == '0':
-        #     neu_list.append(wid)
-    annotation_file.close()
-    # read message file to get weibo content
+def read_annotation_data(input_path):
 
-    pos_results = []
-    neg_results = []
-    # neu_results = []
-    weibo_dict = {}
-    message_file = codecs.open(
-        INPUT_PATH + 'Message.txt', 'r', 'utf-8')
-    count = 0
-    for line in message_file:
-        # remove '\n' at the end of line
-        line = line.rstrip()
-        start_left_index = line.find('<')
-        start_right_index = line.find('>')
-        if start_left_index == -1 or start_right_index == -1:
-            continue
-        weibo_id = line[start_left_index + 1:start_right_index]
-        end_index = line.find(weibo_id, start_right_index + 1)
-        weibo_content = line[start_right_index + 2:end_index - 2]
-        # tokenization start-------------------------------
-        weibo_content = weibo_content.replace(' ', '')
-        weibo_content = removeLink(weibo_content)
-        weibo_content = convertPun(weibo_content)
-        weibo_content = removeTopic(weibo_content)
-        weibo_content = removeBracket(weibo_content)
-        weibo_content = removePrivate(weibo_content)
-        weibo_content = removeForward(weibo_content)
-        weibo_content = weibo_content.replace(' ', '')
-        # tokenization end----------------------------------
-        weibo_content.rstrip()
-        weibo_polarity = 0
-        cur_list = []
-        cur_list.append(weibo_id)
-        cur_list.append(weibo_content)
-        if weibo_id in pos_list:
-            cur_list.append("1")
-            pos_results.append(cur_list)
-        elif weibo_id in neg_list:
-            cur_list.append("-1")
-            neg_results.append(cur_list)
-        # else:
-        #     cur_list.append("0")
-        #     neu_results.append(cur_list)
-    weibo_dict['positive'] = pos_results
-    weibo_dict['negative'] = neg_results
-    # weibo_dict['neutral'] = neu_results
+    with open(input_path, 'r') as annotation_file:
+        pos_list, neg_list = [], []
+        for line in annotation_file:
+            line = line.rstrip()
+            line_list = line.split('	')
+            wid, num = line_list[3], line_list[4]
+            if num == '1':
+                pos_list.append(wid)
+            elif num == '-1':
+                neg_list.append(wid)
+
+        return pos_list, neg_list
+
+
+def read_and_filter_microblog_data(input_path, pos_list, neg_list):
+
+    with open(input_path, 'r') as microblogs_file:
+        pos_results, neg_results, neu_results = [], [], []
+        for line in microblogs_file:
+            # remove '\n' at the end of line
+            line = line.rstrip()
+            start_left_index = line.find('<')
+            start_right_index = line.find('>')
+            if start_left_index == -1 or start_right_index == -1:
+                continue
+            weibo_id = line[start_left_index + 1:start_right_index]
+            end_index = line.find(weibo_id, start_right_index + 1)
+            weibo_content = line[start_right_index + 2:end_index - 2]
+
+            # tokenization start-------------------------------
+            weibo_content = weibo_content.replace(' ', '')
+            weibo_content = removeLink(weibo_content)
+            weibo_content = convertPun(weibo_content)
+            weibo_content = removeTopic(weibo_content)
+            weibo_content = removeBracket(weibo_content)
+            weibo_content = removePrivate(weibo_content)
+            weibo_content = removeForward(weibo_content)
+            weibo_content = weibo_content.replace(' ', '')
+            # tokenization end----------------------------------
+
+            weibo_content.rstrip()
+            weibo_polarity = 0
+            cur_list = []
+            cur_list.append(weibo_id)
+            cur_list.append(weibo_content)
+            if weibo_id in pos_list:
+                cur_list.append("pos")
+                pos_results.append(cur_list)
+            elif weibo_id in neg_list:
+                cur_list.append("neg")
+                neg_results.append(cur_list)
+
+        weibo_dict = {}
+        weibo_dict['positive'], weibo_dict['negative'] = pos_results, neg_results
+
+        return weibo_dict
+
+
+
+# end of tokenization
+def read_and_filter_data(microblog_type):
+    input_path_root = TRAINING_INPUT_PATH if microblog_type == 'training' else TESTING_INPUT_PATH
+
+    # read annotation file to get weibo id
+    input_annotation_path = input_path_root + 'Annotation.txt'
+    pos_list, neg_list = read_annotation_data(input_annotation_path)
+
+    # read message file to get weibo content
+    input_microblog_path = input_path_root + 'Message.txt'
+    weibo_dict = read_and_filter_microblog_data(input_microblog_path, pos_list, neg_list)
+
     return weibo_dict
 
 
