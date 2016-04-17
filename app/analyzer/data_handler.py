@@ -2,7 +2,9 @@
 from app.analyzer.feature_extractor import FeatureExtractor
 
 from app.models import Hashtag, Emoticon, Microblog
-from app.analyzer.data_filter import readWeibo
+from app.analyzer.data_filter import read_and_filter_data
+import os
+
 
 """
 
@@ -47,10 +49,11 @@ microblog data handler
 
 def microblog_data_handler(microblog_type):
 
-    microblog_type = 0 if microblog_type == 'training' else 1 if microblog_type == 'testing' else None
-    result = []
-    microblogs = readWeibo()
+    microblogs = read_and_filter_data(microblog_type)
+
     feature_extractor = FeatureExtractor()
+    result = []
+
     for polarity in microblogs:
         microblog_list = microblogs[polarity]
         for microblog in microblog_list:
