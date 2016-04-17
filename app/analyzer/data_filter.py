@@ -84,6 +84,20 @@ def read_annotation_data(input_path):
         return pos_list, neg_list
 
 
+def text_filters(weibo_content):
+
+    weibo_content = weibo_content.replace(' ', '')
+    weibo_content = removeLink(weibo_content)
+    weibo_content = convertPun(weibo_content)
+    weibo_content = removeTopic(weibo_content)
+    weibo_content = removeBracket(weibo_content)
+    weibo_content = removePrivate(weibo_content)
+    weibo_content = removeForward(weibo_content)
+    weibo_content = weibo_content.replace(' ', '')
+
+    return weibo_content
+
+
 def read_and_filter_microblog_data(input_path, pos_list, neg_list):
 
     with open(input_path, 'r') as microblogs_file:
@@ -100,14 +114,7 @@ def read_and_filter_microblog_data(input_path, pos_list, neg_list):
             weibo_content = line[start_right_index + 2:end_index - 2]
 
             # tokenization start-------------------------------
-            weibo_content = weibo_content.replace(' ', '')
-            weibo_content = removeLink(weibo_content)
-            weibo_content = convertPun(weibo_content)
-            weibo_content = removeTopic(weibo_content)
-            weibo_content = removeBracket(weibo_content)
-            weibo_content = removePrivate(weibo_content)
-            weibo_content = removeForward(weibo_content)
-            weibo_content = weibo_content.replace(' ', '')
+            weibo_content = text_filters(weibo_content)
             # tokenization end----------------------------------
 
             weibo_content.rstrip()

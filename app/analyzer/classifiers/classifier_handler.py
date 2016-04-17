@@ -5,7 +5,7 @@ import pickle
 from app.analyzer.classifiers.classifiers import origin_nb_classifier, multinomial_nb_classifer, bernoulli_nb_classifer, \
     logistic_regression_classifier, perceptron_classifier, linearSVC_classifier
 from app.analyzer.classifiers.vote_handler import VoteClassifier
-from app.models import TestResult, Microblog
+from app.models import TestResult, Microblog, SearchResult
 from collections import defaultdict
 import random
 
@@ -140,16 +140,37 @@ def classify_testing():
     # random.shuffle(test_set)
     # test_set = test_set[2000:]
 
-    all_classifiers = []
     for (name, input_path) in classifier_path_list:
         with open(input_path, 'rb') as input_classifier:
             classifier = pickle.load(input_classifier)
-            all_classifiers.append(classifier)
             save_testing_result(classifier, test_set, name)
             # classifier.show_most_informative_features(15)
     # voted_classifier = VoteClassifier(all_classifiers)
     # save_testing_result(voted_classifier, test_set, 'All in one classifier')
 
+
+class ApiClassifier:
+
+    def __init__(self):
+        self.all_classifiers = []
+        for (name, input_path) in classifier_path_list:
+            with open(input_path, 'rb') as input_classifier:
+                classifier = pickle.load(input_classifier)
+                self.all_classifiers.append(classifier)
+        self.vote_classifier = VoteClassifier(self.all_classifiers)
+
+    def classify(self, microblogs):
+
+        searchResults = []
+        words_features = get_words_features_pickle()
+        for (text, words, taggings) in microblogs:
+            test_features = feature_filter(words, words_features)
+            polarity = self.vote_classifier.classify(test_features)
+            confidence = round(self.vote_classifier.confidence(test_features)*100, 2)
+            single_searchResult = SearchResult(text=text, words=words, polarity=polarity, confidence=confidence)
+            searchResults.append(single_searchResult)
+
+        return searchResults
 
 # def classify_data_from_api(data):
 #     test_set = None
