@@ -3,7 +3,7 @@ import nltk
 from nltk.metrics import precision, recall, f_measure
 import pickle
 from app.analyzer.classifiers.classifiers import origin_nb_classifier, multinomial_nb_classifer, bernoulli_nb_classifer, \
-    logistic_regression_classifier, perceptron_classifier, linearSVC_classifier, nuSVC_classifier
+    logistic_regression_classifier, perceptron_classifier, linearSVC_classifier
 from app.analyzer.classifiers.vote_handler import VoteClassifier
 from app.models import TestResult, Microblog
 from collections import defaultdict
@@ -12,7 +12,8 @@ import random
 
 CURRENT_DIR_PATH = os.path.dirname(os.path.dirname(__file__)) + '/pickles/'
 
-WORDS_FEATURES_PATH = CURRENT_DIR_PATH + '/wordsFeature.pickle'
+WORDS_FEATURES_PATH = CURRENT_DIR_PATH + 'wordsFeature.pickle'
+FEATURE_SET_PATH = CURRENT_DIR_PATH + 'featureSet.pickle'
 
 ORIGIN_NB_PATH = CURRENT_DIR_PATH + 'originNB.pickle'
 MULTINOMIAL_NB_PATH = CURRENT_DIR_PATH + 'multinomialNB.pickle'
@@ -23,8 +24,7 @@ LINEAR_SVC_PATH = CURRENT_DIR_PATH + 'linearSVC.pickle'
 NU_SVC_PATH = CURRENT_DIR_PATH + 'nuSVC.pickle'
 
 classifier_path_list = [('origin_nb', ORIGIN_NB_PATH), ('multinomial_nb', MULTINOMIAL_NB_PATH), ('bernoulli_nb', BERNOULLI_NB_PATH),
-                        ('logistic_regression', LOGISTIC_REGRESSION_PATH), ('perceptron', PERCEPTRON_PATH), ('linear_svc', LINEAR_SVC_PATH),
-                        ('nu_svc', NU_SVC_PATH)]
+                        ('logistic_regression', LOGISTIC_REGRESSION_PATH), ('perceptron', PERCEPTRON_PATH), ('linear_svc', LINEAR_SVC_PATH)]
 
 TAGGING_CHOOSE = set(['nr', 'n', 'ul'])
 
@@ -74,12 +74,16 @@ def get_feature_set(microblogType):
 
     random.shuffle(feature_sets)
 
+    with open(FEATURE_SET_PATH, 'wb') as output_file:
+        pickle.dump(feature_sets, output_file)
+
     return feature_sets
 
 
 def module_build():
     pickle_words_features()
     train_set = get_feature_set(0)
+    random.shuffle(train_set)
     train_set = train_set[2000:]
 
     #naive bayes classifiers
@@ -93,7 +97,7 @@ def module_build():
 
     #svm classifiers
     linearSVC_classifier(train_set, LINEAR_SVC_PATH)
-    nuSVC_classifier(train_set, NU_SVC_PATH)
+    # nuSVC_classifier(train_set, NU_SVC_PATH)
 
 
 def overall_score_calculator(pos, neg, pos_count, neg_count):
@@ -134,9 +138,13 @@ def save_testing_result(classifier, test_feats, classifier_name):
                             precision=overall_precision, recall=overall_recall, f_score=overall_f_score)
     testResult.save()
 
+def get_pickle_feature_set():
+    with open(FEATURE_SET_PATH, 'rb') as input_file:
+        return pickle.load(input_file)
+
 
 def classify_testing():
-    test_set = get_feature_set(0)
+    test_set = get_pickle_feature_set()
     test_set = test_set[:2000]
     all_classifiers = []
     for (name, input_path) in classifier_path_list:
