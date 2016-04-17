@@ -1,14 +1,99 @@
 <!DOCTYPE html>
 <html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
+<head>
+    <title>USC 2014 Fall 577a Team 11 - sharethetraining</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="utf-8">
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css" media="screen">
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="//code.jquery.com/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="../static/js/bootstrap.min.js"></script>
 </head>
 <body>
-<ul>
-{% for testResult in testResults %}
-    <li>{{ testResult.classifier }}:  {{ testResult.probability }}</li>
-{% endfor %}
-</ul>
+<div class="navbar navbar-default navbar-static-top">
+    <div class="container">
+        <div class="navbar-header">
+            <a href="../index.html" class="navbar-brand">544 Project - Team28</a>
+            <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+        </div>
+
+        <div class="navbar-collapse collapse" id="navbar-main">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">result</a></li>
+                <li><a href="#">Team</a></li>
+            </ul>
+
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="row">
+        <div class="col-lg-12 col-md-12 ">
+            <div class="page-header">
+                <h1>Result of Sentiment Analyzer</h1>
+            </div>
+
+          <span>
+          <table class="table table-striped table-bordered table-hover ">
+              <thead>
+              <tr>
+                  <th>Classifier</th>
+                  <th>Accuracy</th>
+                  <th>Overall Fscore</th>
+                  <th>Overall Precision</th>
+                  <th>Overall recall</th>
+                  <th>Pos Count</th>
+                  <th>Neg Count</th>
+                  <th>Pos FScore</th>
+                  <th>Pos Precision</th>
+                  <th>Pos Recall</th>
+                  <th>Neg FScore</th>
+                  <th>Neg Precision</th>
+                  <th>Neg Recall</th>
+              </tr>
+              </thead>
+              <tbody>
+              {% for result in testResults%}
+              <tr>
+                  <td>{{ result.classifier }}</td>
+                  <td>{{ result.accuracy }}</td>
+                  <td>{{ result.f_score }}</td>
+                  <td>{{ result.precision }}</td>
+                  <td>{{ result.recall }}</td>
+                  <td>{{ result.pos_count }}</td>
+                  <td>{{ result.neg_count }}</td>
+                  <td>{{ result.pos_f_score }}</td>
+                  <td>{{ result.pos_precision }}</td>
+                  <td>{{ result.pos_recall }}</td>
+                  <td>{{ result.neg_f_score }}</td>
+                  <td>{{ result.neg_precision }}</td>
+                  <td>{{ result.neg_recall }}</td>
+              </tr>
+              {% endfor %}
+
+              </tbody>
+          </table>
+        </span>
+        </div>
+    </div>
+
+
+    <footer>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <div class="page-footer" align="center">
+                    <small>Copyright &copy; 2016 Spring 544 Team 28 - Fantastic Four</small>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
 </body>
 </html>

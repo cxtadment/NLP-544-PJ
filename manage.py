@@ -2,9 +2,10 @@
 
 from flask.ext.script import Manager, Server
 from app import create_app
-from app.analyzer.classifiers.classifier_handler import module_build, classify
+from app.analyzer.classifiers.classifier_handler import module_build, classify_testing
 from app.analyzer.data_handler import hashtag_data_handler, microblog_data_handler, emoticon_data_handler
-from app.models import Hashtag, Microblog, Emoticon
+from app.analyzer.feature_extractor import FeatureExtractor
+from app.models import Hashtag, Microblog, Emoticon, TestDict, TestResult
 
 app = create_app()
 manager = Manager(app)
@@ -70,6 +71,7 @@ microblog command operators
 @manager.command
 def add_microblog(microblog_type):
     microblogs = microblog_data_handler(microblog_type)
+    print(len(microblogs))
     Microblog.objects.insert(microblogs)
 
 @manager.command
@@ -94,9 +96,29 @@ def print_microblog():
 
 @manager.command
 def test_classifier():
-    module_build()
-    classify()
+    # module_build()
+    # TestResult.objects.delete()
+    classify_testing()
 
+@manager.command
+def test_dict():
+    thisjson = {"haha": "shabi", "xixi": "caonima"}
+    thisdict = TestDict(thisdict=thisjson)
+    thisdict.save()
+@manager.command
+def test_count():
+    feature_extracter = FeatureExtractor()
+    feature_extracter.polarity_count("我不是不喜欢你，只是不想和你在一起")
+
+@manager.command
+def test_feature():
+    microblogId, microblog_text, polarity = "234", "我不喜欢你， 你这个愚昧的家伙，脑子有毛病", 1
+    feature_extracter = FeatureExtractor()
+    words, taggings = feature_extracter.pos_tagging(microblog_text)
+    posCount, negCount = feature_extracter.polarity_count(microblog_text)
+    single_microblog = Microblog(microblogId=microblogId, text=microblog_text, polarity=polarity, negCount=negCount,
+                                             posCount=posCount, words=words, taggings=taggings, microblogType=1, topic=None, sentiment=None)
+    single_microblog.save()
 
 if __name__ == '__main__':
     manager.run()
