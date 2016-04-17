@@ -69,6 +69,7 @@ microblog command operators
 
 """
 @manager.command
+
 def add_microblog():
     Microblog.objects.delete()
     microblogs = microblog_data_handler('training')
@@ -113,7 +114,7 @@ def print_microblog():
 
 @manager.command
 def test_classifier():
-    module_build()
+    # module_build()
     TestResult.objects.delete()
     classify_testing()
 

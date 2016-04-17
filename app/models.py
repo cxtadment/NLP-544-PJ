@@ -50,6 +50,7 @@ class Result(db.Document):
     def __str__(self):
         return "microblogId: %s, posPercent: %s, negPercent: %s, polarity: %s, sentiment: %s" % (self.microblogId, self.posPercent, self.negPercent, self.polarity, self.sentiment)
 
+
 class TestResult(db.Document):
     classifier = db.StringField()
     accuracy = db.FloatField()
@@ -70,6 +71,11 @@ class TestResult(db.Document):
     neu_f_score = db.FloatField()
 
 
+class SearchResult(db.Document):
+    microblog_text = db.StringField()
+    polarity = db.StringField()
+    confidence = db.FloatField()
+    words = db.ListField(db.StringField())
 
 
 class TestDict(db.Document):
