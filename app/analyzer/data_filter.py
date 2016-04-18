@@ -10,7 +10,9 @@ import os
 
 TRAINING_INPUT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/resources/data/SIGHAN8-Task2-Corpus-Release/'
 TESTING_INPUT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/resources/data/SIGHAN8-Task2-Corpus/'
-
+CURRENT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/resources/polarity/'
+POSITIVE_WEIBO_PATH = "positive_weibo.txt"
+NEGATIVE_WEIBO_PATH = "negative_weibo.txt"
 
 def convertPun(content):
     punctuation_list = ['，', '。', '？', '！', '……', ':', '「', '」', '.....', '】', '：', '、']
@@ -147,5 +149,44 @@ def read_and_filter_data(microblog_type):
     weibo_dict = read_and_filter_microblog_data(input_microblog_path, pos_list, neg_list)
 
     return weibo_dict
+
+def read_and_filter_api_microblog_data(polarity):
+	input_path = ""
+	if polarity == 'positive':
+		input_path = POSITIVE_WEIBO_PATH
+	else:
+		input_path = NEGATIVE_WEIBO_PATH
+	with open(input_path) as microblogs_file:
+		pos_results, neg_results = [], []
+		weibo_id = 1
+		for text in microblogs_file:
+			cur_list = []
+			text = text.rstrip()
+			# tokenization start-------------------------------
+            text = text.replace(' ', '')
+            text = removeLink(text)
+            text = convertPun(text)
+            text = removeTopic(text)
+            text = removeBracket(text)
+            text = removePrivate(text)
+           	text = removeForward(text)
+            text = text.replace(' ', '')
+            # tokenization end----------------------------------
+            cur_list.append(weibo_id)
+            cur_list.append(text)
+            if polarity == 'positive':
+            	pos_results.append(cur_list)
+            else:
+            	neg_results.append(cur_list)
+            weibo_id = weibo_id + 1
+        weibo_dict = {}
+        weibo_dict['positive'] = pos_results
+        weibo_dict['negative'] = neg_results
+    return weibo_dict        
+
+
+
+
+
 
 
