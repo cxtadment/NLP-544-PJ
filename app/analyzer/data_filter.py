@@ -11,8 +11,10 @@ import string
 TRAINING_INPUT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/resources/data/SIGHAN8-Task2-Corpus-Release/'
 TESTING_INPUT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/resources/data/SIGHAN8-Task2-Corpus/'
 CURRENT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/resources/polarity/'
-POSITIVE_WEIBO_PATH = "positive_weibo.txt"
-NEGATIVE_WEIBO_PATH = "negative_weibo.txt"
+POSITIVE_WEIBO_TRAINING_PATH = "positive_weibo_training.txt"
+NEGATIVE_WEIBO_TRAINING_PATH = "negative_weibo_training.txt"
+POSITIVE_WEIBO_TEST_PATH = "positive_weibo_test.txt"
+NEGATIVE_WEIBO_TEST_PATH = "negative_weibo_test.txt"
 
 def convertPun(content):
     punctuation_list = ['，', '。', '？', '！', '……', ':', '「', '」', '.....', '】', '：', '、']
@@ -131,7 +133,6 @@ def read_and_filter_microblog_data(input_path, pos_list, neg_list):
 
         weibo_dict = {}
         weibo_dict['positive'], weibo_dict['negative'] = pos_results, neg_results
-
         return weibo_dict
 
 
@@ -150,14 +151,20 @@ def read_and_filter_data(microblog_type):
 
     return weibo_dict
 
-def read_and_filter_api_microblog_data():
-    input_positive_path = CURRENT_DIR_PATH + POSITIVE_WEIBO_PATH
-    input_negative_path = CURRENT_DIR_PATH + NEGATIVE_WEIBO_PATH
-    pos_results = read_and_filter_api_microblog_data_polarity(input_positive_path, 'positive')
-    neg_results = read_and_filter_api_microblog_data_polarity(input_negative_path, 'negative')
+def read_and_filter_api_microblog_data(microblog_type):
+    input_positive_training_path = ""
+    input_negative_path = ""
+    if microblog_type = 'training':
+        input_positive_path = CURRENT_DIR_PATH + POSITIVE_WEIBO_TRAINING_PATH
+        input_negative_path = CURRENT_DIR_PATH + NEGATIVE_WEIBO_TRAINING_PATH
+    else:
+        input_positive_path = CURRENT_DIR_PATH + POSITIVE_WEIBO_TEST_PATH
+        input_negative_path = CURRENT_DIR_PATH + NEGATIVE_WEIBO_TEST_PATH
+    pos_results = read_and_filter_api_microblog_data_polarity(input_positive_path, 'pos')
+    neg_results = read_and_filter_api_microblog_data_polarity(input_negative_path, 'neg')
     weibo_dict = {}
-    weibo_dict['positive'] = pos_results
-    weibo_dict['negative'] = neg_results
+    weibo_dict['pos'] = pos_results
+    weibo_dict['neg'] = neg_results
     return weibo_dict
 
 def read_and_filter_api_microblog_data_polarity(input_path, polarity):
