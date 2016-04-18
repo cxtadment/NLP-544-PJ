@@ -40,9 +40,9 @@ for i in range(1, 400):
 		diffFile.write(result)
 	# same classification
 	else:
-		if textCai[0]=='positive':
+		if textCai[3]=='positive':
 			same_dict['positive'].append(textCai[0]+','+textCai[3])
-		elif textCai[0]=='negative':
+		elif textCai[3]=='negative':
 			same_dict['negative'].append(textCai[0]+','+textCai[3])
 		else:
 			same_dict['neutral'].append(textCai[0]+','+textCai[3])		
@@ -55,13 +55,14 @@ for i in range(400, 816):
 		diffFile.write(result)
 	# same classification		
 	else:
-		if textCai[0]=='positive':
+		if textCai[3]=='positive':
 			same_dict['positive'].append(textTian[0]+','+textTian[3])
-		elif textCai[0]=='negative':
+		elif textCai[3]=='negative':
 			same_dict['negative'].append(textTian[0]+','+textTian[3])
 		else:
 			same_dict['neutral'].append(textTian[0]+','+textTian[3])
 for key in same_dict:
+	print key + '\n'
 	print u'\n'.join(same_dict[key])				
 diffFile.close()		
 
