@@ -75,9 +75,9 @@ def add_microblog():
     Microblog.objects.delete()
     microblogs = microblog_data_handler('training')
     print(len(microblogs))
-    Microblog.objects.insert(microblogs)
-    microblogs = microblog_data_handler('testing')
-    print(len(microblogs))
+    # Microblog.objects.insert(microblogs)
+    # microblogs = microblog_data_handler('testing')
+    # print(len(microblogs))
     Microblog.objects.insert(microblogs)
 
 @manager.command
@@ -115,7 +115,7 @@ def print_microblog():
 
 @manager.command
 def test_classifier():
-    # module_build()
+    module_build()
     TestResult.objects.delete()
     classify_testing()
 
