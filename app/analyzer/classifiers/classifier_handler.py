@@ -176,11 +176,11 @@ class ApiClassifier:
     def classify(self, microblogs):
         searchResults = []
         words_features = get_words_features_pickle()
-        for (text, words, taggings) in microblogs:
+        for (text, filter_text, words, taggings) in microblogs:
             test_features = feature_filter(words, words_features)
             polarity = self.vote_classifier.classify(test_features)
             confidence = round(self.vote_classifier.confidence(test_features)*100, 2)
-            single_searchResult = SearchResult(text=text, words=words, polarity=polarity, confidence=confidence)
+            single_searchResult = SearchResult(text=text, filter_text=filter_text, words=words, polarity=polarity, confidence=confidence)
             searchResults.append(single_searchResult)
 
         return searchResults
