@@ -48,5 +48,17 @@ class SinaAPIRequest:
 
 
 def get_microblogs_by_keywords(keyword):
-    return None
+    topic = urllib.parse.urlencode({'q': keyword})
+    microblogs = []
+    for i in range(1, 5):
+        page = str(i)
+        url = URL_PREFIX + '?' + topic + '&page=' + page + '&count=' + COUNT + '&access_token=' + ACCESS_TOKEN
+        weibo = urllib.request.urlopen(url).read().decode()
+        weibo_json = json.loads(weibo)
+        rows = 0
+        for user in weibo_json['statuses']:
+            rows = rows + 1
+            text = user['text']
+            microblogs.append(text)
+    return microblogs
 

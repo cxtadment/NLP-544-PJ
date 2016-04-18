@@ -25,7 +25,7 @@ class FeatureExtractor:
             for line in topics_doc:
                 segment_list=list(jieba.cut(line.rstrip()))
                 for segment in segment_list:
-                    self.topics.add(segment)     
+                    self.topics.add(segment)
 
     """
 
@@ -65,8 +65,8 @@ class FeatureExtractor:
             return False
         # if the word is in the topics
         if word in self.topics:
-            return False 
-        return True 
+            return False
+        return True
 
     """
 
@@ -87,6 +87,6 @@ class FeatureExtractor:
 
 
 
-        
+
 
 
