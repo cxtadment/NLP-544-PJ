@@ -3,12 +3,13 @@ import os
 import nltk
 from nltk.metrics import precision, recall, f_measure
 import pickle
-from app.analyzer.classifiers.classifiers import origin_nb_classifier, multinomial_nb_classifer, bernoulli_nb_classifer, \
-    logistic_regression_classifier, perceptron_classifier, linearSVC_classifier, random_forest_classifier
+from app.analyzer.classifiers.classifiers import origin_nb_classifier, multinomial_nb_classifer, \
+    logistic_regression_classifier, linearSVC_classifier, random_forest_classifier
 from app.analyzer.classifiers.vote_handler import VoteClassifier
 from app.models import TestResult, Microblog, SearchResult
 from collections import defaultdict
 import random
+
 
 
 CURRENT_DIR_PATH = os.path.dirname(os.path.dirname(__file__)) + '/pickles/'
@@ -24,20 +25,11 @@ PERCEPTRON_PATH = CURRENT_DIR_PATH + 'perceptron.pickle'
 LINEAR_SVC_PATH = CURRENT_DIR_PATH + 'linearSVC.pickle'
 RANDOM_FOREST_PATH = CURRENT_DIR_PATH + 'random_forest.pickle'
 
-classifier_path_list = [('origin_nb', ORIGIN_NB_PATH), ('multinomial_nb', MULTINOMIAL_NB_PATH), ('bernoulli_nb', BERNOULLI_NB_PATH),
-                        ('logistic_regression', LOGISTIC_REGRESSION_PATH), ('perceptron', PERCEPTRON_PATH), ('linear_svc', LINEAR_SVC_PATH),
-                        ('random_forest', RANDOM_FOREST_PATH)]
+classifier_path_list = [('Naive Bayes', ORIGIN_NB_PATH), ('Multinomial Naive Bayes', MULTINOMIAL_NB_PATH),
+                        ('Logistic Regression', LOGISTIC_REGRESSION_PATH), ('Linear SVC', LINEAR_SVC_PATH),
+                        ('Random Forest', RANDOM_FOREST_PATH)]
 
 TAGGING_CHOOSE = set(['nr', 'n', 'ul'])
-
-# for t in range(len(microblog.words)):
-        #     if microblog.taggings[t] in TAGGING_CHOOSE:
-        #         all_noun_words.extend(microblog.words[t])
-        #     elif microblog.taggings[t] == 'a':
-        #         all_adj_words.extend(microblog.words[t])
-
-    # all_noun_words = nltk.FreqDist(all_noun_words)
-    # all_adj_words = nltk.FreqDist(all_adj_words)
 
 
 def get_words_features_pickle():
@@ -53,7 +45,7 @@ def pickle_words_features(microblogType):
         all_words.extend(microblog.words)
     all_words = nltk.FreqDist(all_words)
 
-    words_features = list(all_words.keys())[:1500]
+    words_features = list(all_words.keys())[:1400]
 
     with open(WORDS_FEATURES_PATH, 'wb') as output_file:
         pickle.dump(words_features, output_file)
@@ -70,15 +62,28 @@ def feature_filter(document, words_features):
 
 # def get_feature_set_for_api(words, words_features):
 
+def pickle_feature_set(feature_set):
+    with open(FEATURE_SET_PATH, 'wb') as output_file:
+        pickle.dump(feature_set, output_file)
+
+def get_pickle_feature_set():
+    with open(FEATURE_SET_PATH, 'rb') as input_file:
+        feature_set = pickle.load(input_file)
+        return feature_set
 
 
 def get_feature_set(microblogType):
 
-    microblogs = Microblog.objects(microblogType=microblogType)
+    microblogs = Microblog.objects()
 
     words_features = get_words_features_pickle()
 
     feature_sets = [(feature_filter(microblog.words, words_features), microblog.polarity) for microblog in microblogs]
+
+    random.shuffle(feature_sets)
+
+    pickle_feature_set(feature_sets)
+
 
     return feature_sets
 
@@ -87,15 +92,16 @@ def module_build():
 
     pickle_words_features('training')
     train_set = get_feature_set('training')
+    train_set = train_set[2000:]
 
     #naive bayes classifiers
     origin_nb_classifier(train_set, ORIGIN_NB_PATH)
     multinomial_nb_classifer(train_set, MULTINOMIAL_NB_PATH)
-    bernoulli_nb_classifer(train_set, BERNOULLI_NB_PATH)
+    # bernoulli_nb_classifer(train_set, BERNOULLI_NB_PATH)
 
     #linear classifiers
     logistic_regression_classifier(train_set, LOGISTIC_REGRESSION_PATH)
-    perceptron_classifier(train_set, PERCEPTRON_PATH)
+    # perceptron_classifier(train_set, PERCEPTRON_PATH)
 
     #svm classifiers
     linearSVC_classifier(train_set, LINEAR_SVC_PATH)
@@ -143,19 +149,20 @@ def save_testing_result(classifier, test_feats, classifier_name):
     testResult.save()
 
 
+def baseline_method():
+
+
 def classify_testing():
 
-    test_set = get_feature_set('testing')
-    # random.shuffle(test_set)
-    # test_set = test_set[2000:]
+    test_set = get_pickle_feature_set()
+    random.shuffle(test_set)
+    test_set = test_set[:2000]
 
     for (name, input_path) in classifier_path_list:
         with open(input_path, 'rb') as input_classifier:
             classifier = pickle.load(input_classifier)
             save_testing_result(classifier, test_set, name)
-            # classifier.show_most_informative_features(15)
-    # voted_classifier = VoteClassifier(all_classifiers)
-    # save_testing_result(voted_classifier, test_set, 'All in one classifier')
+            # classifier.show_most_informative_features(25)
 
 
 def get_classifier(classifier_path):
@@ -167,11 +174,9 @@ def get_classifier(classifier_path):
 class ApiClassifier:
 
     def __init__(self):
-        self.nb_classifier, self.mu_nb_classifier, self.be_nb_classifier = get_classifier(ORIGIN_NB_PATH), get_classifier(MULTINOMIAL_NB_PATH), get_classifier(BERNOULLI_NB_PATH)
-        self.lg_re_classifier, self.perceptron = get_classifier(LOGISTIC_REGRESSION_PATH), get_classifier(PERCEPTRON_PATH)
+        self.nb_classifier, self.mu_nb_classifier, self.lg_re_classifier = get_classifier(ORIGIN_NB_PATH), get_classifier(MULTINOMIAL_NB_PATH), get_classifier(LOGISTIC_REGRESSION_PATH)
         self.li_svc_classifier, self.random_forest_classifier = get_classifier(LINEAR_SVC_PATH), get_classifier(RANDOM_FOREST_PATH)
-        self.vote_classifier = VoteClassifier(self.nb_classifier, self.mu_nb_classifier, self.be_nb_classifier,
-                                              self.lg_re_classifier, self.perceptron, self.li_svc_classifier, self.random_forest_classifier)
+        self.vote_classifier = VoteClassifier(self.nb_classifier, self.mu_nb_classifier, self.lg_re_classifier, self.li_svc_classifier, self.random_forest_classifier)
 
     def classify(self, microblogs):
         searchResults = []

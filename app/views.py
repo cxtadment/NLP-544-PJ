@@ -32,6 +32,6 @@ def analyze_microblogs_from_api():
     random.shuffle(microblogs)
     apiClassifier = ApiClassifier()
     analyze_results = apiClassifier.classify(microblogs)
-    SearchResult.objects.insert(analyze_results)
+    # SearchResult.objects.insert(analyze_results)
 
     return jsonify(result=[e.serialize() for e in analyze_results])
