@@ -72,7 +72,7 @@ class TestResult(db.Document):
 
 
 class SearchResult(db.Document):
-    microblog_text = db.StringField()
+    text = db.StringField()
     polarity = db.StringField()
     confidence = db.FloatField()
     words = db.ListField(db.StringField())
