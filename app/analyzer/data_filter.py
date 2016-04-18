@@ -132,9 +132,8 @@ def read_and_filter_microblog_data(input_path, pos_list, neg_list):
                 neg_results.append(cur_list)
 
         weibo_dict = {}
-        weibo_dict['positive'], weibo_dict['negative'] = pos_results, neg_results
+        weibo_dict['pos'], weibo_dict['neg'] = pos_results, neg_results
         return weibo_dict
-
 
 
 # end of tokenization
@@ -154,7 +153,7 @@ def read_and_filter_data(microblog_type):
 def read_and_filter_api_microblog_data(microblog_type):
     input_positive_training_path = ""
     input_negative_path = ""
-    if microblog_type = 'training':
+    if microblog_type == 'training':
         input_positive_path = CURRENT_DIR_PATH + POSITIVE_WEIBO_TRAINING_PATH
         input_negative_path = CURRENT_DIR_PATH + NEGATIVE_WEIBO_TRAINING_PATH
     else:
@@ -166,6 +165,7 @@ def read_and_filter_api_microblog_data(microblog_type):
     weibo_dict['pos'] = pos_results
     weibo_dict['neg'] = neg_results
     return weibo_dict
+
 
 def read_and_filter_api_microblog_data_polarity(input_path, polarity):
     polarity_results = []

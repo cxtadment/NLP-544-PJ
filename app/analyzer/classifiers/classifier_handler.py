@@ -1,3 +1,4 @@
+
 import os
 import nltk
 from nltk.metrics import precision, recall, f_measure
@@ -52,7 +53,7 @@ def pickle_words_features(microblogType):
         all_words.extend(microblog.words)
     all_words = nltk.FreqDist(all_words)
 
-    words_features = list(all_words.keys())[:1400]
+    words_features = list(all_words.keys())[:1500]
 
     with open(WORDS_FEATURES_PATH, 'wb') as output_file:
         pickle.dump(words_features, output_file)
