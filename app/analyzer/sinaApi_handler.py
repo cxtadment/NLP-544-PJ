@@ -38,6 +38,7 @@ class SinaAPIRequest:
             polarity_words = self.negative_words
             weibo_training_file = open(CURRENT_DIR_PATH + NEGATIVE_WEIBO_TRAINING_PATH, 'a+')
             weibo_test_file = open(CURRENT_DIR_PATH + NEGATIVE_WEIBO_TEST_PATH, 'a+')
+        training = True
         for word in polarity_words:
             topic = urllib.parse.urlencode({'q': word})
             for i in range(1, 5):
@@ -45,18 +46,30 @@ class SinaAPIRequest:
                 url = URL_PREFIX + '?' + topic + '&page=' + page + '&count=' + COUNT + '&access_token=' + ACCESS_TOKEN
                 weibo = urllib.request.urlopen(url).read().decode()
                 weibo_json = json.loads(weibo)
-                training = True
                 for user in weibo_json['statuses']:
                     text = user['text']
-                    if training = True:
+                    if training == True:
                         weibo_training_file.write(text+ '\n')
                         training = False
                     else:
                         weibo_test_file.write(text + '\n')  
                         training = True 
-        weibo_file.close()
+        weibo_training_file.close()
+        weibo_test_file.close()
 
 
 def get_microblogs_by_keywords(keyword):
-    return None
+    topic = urllib.parse.urlencode({'q': keyword})
+    microblogs = []
+    for i in range(1, 5):
+        page = str(i)
+        url = URL_PREFIX + '?' + topic + '&page=' + page + '&count=' + COUNT + '&access_token=' + ACCESS_TOKEN
+        weibo = urllib.request.urlopen(url).read().decode()
+        weibo_json = json.loads(weibo)
+        rows = 0
+        for user in weibo_json['statuses']:
+            rows = rows + 1
+            text = user['text']
+            microblogs.append(text)
+    return microblogs
 

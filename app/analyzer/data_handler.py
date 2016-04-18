@@ -4,7 +4,7 @@ from app.analyzer.sinaApi_handler import get_microblogs_by_keywords
 
 from app.models import Hashtag, Emoticon, Microblog
 
-from app.analyzer.data_filter import read_and_filter_data, read_and_filter_api_microblog_data
+from app.analyzer.data_filter import text_filters, read_and_filter_api_microblog_data
 import os
 
 
