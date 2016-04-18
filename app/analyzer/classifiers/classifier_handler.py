@@ -3,7 +3,7 @@ import nltk
 from nltk.metrics import precision, recall, f_measure
 import pickle
 from app.analyzer.classifiers.classifiers import origin_nb_classifier, multinomial_nb_classifer, bernoulli_nb_classifer, \
-    logistic_regression_classifier, perceptron_classifier, linearSVC_classifier
+    logistic_regression_classifier, perceptron_classifier, linearSVC_classifier, random_forest_classifier
 from app.analyzer.classifiers.vote_handler import VoteClassifier
 from app.models import TestResult, Microblog, SearchResult
 from collections import defaultdict
@@ -21,10 +21,11 @@ BERNOULLI_NB_PATH = CURRENT_DIR_PATH + 'bernoulliNB.pickle'
 LOGISTIC_REGRESSION_PATH = CURRENT_DIR_PATH + 'logisticRegression.pickle'
 PERCEPTRON_PATH = CURRENT_DIR_PATH + 'perceptron.pickle'
 LINEAR_SVC_PATH = CURRENT_DIR_PATH + 'linearSVC.pickle'
-NU_SVC_PATH = CURRENT_DIR_PATH + 'nuSVC.pickle'
+RANDOM_FOREST_PATH = CURRENT_DIR_PATH + 'random_forest.pickle'
 
 classifier_path_list = [('origin_nb', ORIGIN_NB_PATH), ('multinomial_nb', MULTINOMIAL_NB_PATH), ('bernoulli_nb', BERNOULLI_NB_PATH),
-                        ('logistic_regression', LOGISTIC_REGRESSION_PATH), ('perceptron', PERCEPTRON_PATH), ('linear_svc', LINEAR_SVC_PATH)]
+                        ('logistic_regression', LOGISTIC_REGRESSION_PATH), ('perceptron', PERCEPTRON_PATH), ('linear_svc', LINEAR_SVC_PATH),
+                        ('random_forest', RANDOM_FOREST_PATH)]
 
 TAGGING_CHOOSE = set(['nr', 'n', 'ul'])
 
@@ -94,6 +95,9 @@ def module_build():
     #svm classifiers
     linearSVC_classifier(train_set, LINEAR_SVC_PATH)
 
+    #random forest
+    random_forest_classifier(train_set, RANDOM_FOREST_PATH)
+
 
 def overall_score_calculator(pos, neg, pos_count, neg_count):
     return round(float((pos*pos_count + neg*neg_count) / (pos_count + neg_count)), 2)
@@ -125,9 +129,9 @@ def save_testing_result(classifier, test_feats, classifier_name):
     overall_recall = overall_score_calculator(pos_recall, neg_recall, pos_count, neg_count)
     overall_f_score = overall_score_calculator(pos_f_score, neg_f_score, pos_count, neg_count)
 
-    accuracy = (nltk.classify.accuracy(classifier, test_feats)) * 100
+    # accuracy = (nltk.classify.accuracy(classifier, test_feats)) * 100
 
-    testResult = TestResult(classifier=classifier_name, accuracy=accuracy, pos_count=pos_count, neg_count=neg_count,
+    testResult = TestResult(classifier=classifier_name,  pos_count=pos_count, neg_count=neg_count,
                             pos_precision=pos_precision, pos_recall=pos_recall, pos_f_score=pos_f_score,
                             neg_precision=neg_precision, neg_recall=neg_recall, neg_f_score=neg_f_score,
                             precision=overall_precision, recall=overall_recall, f_score=overall_f_score)
