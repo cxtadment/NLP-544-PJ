@@ -11,12 +11,15 @@ URL_PREFIX = "https://api.weibo.com/2/search/topics.json"
 CURRENT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/resources/polarity/'
 POSITIVE_WORDS_PATH = "positive_words.txt"
 NEGATIVE_WORDS_PATH = "negative_words.txt"
-POSITIVE_WEIBO_PATH = "positive_weibo.txt"
-NEGATIVE_WEIBO_PATH = "negative_weibo.txt"
+POSITIVE_WEIBO_TRAINING_PATH = "positive_weibo_training.txt"
+NEGATIVE_WEIBO_TRAINING_PATH = "negative_weibo_training.txt"
+POSITIVE_WEIBO_TEST_PATH = "positive_weibo_test.txt"
+NEGATIVE_WEIBO_TEST_PATH = "negative_weibo_test.txt"
 COUNT = "50"
 
 
 class SinaAPIRequest:
+
     def __init__(self):
         with open(CURRENT_DIR_PATH + POSITIVE_WORDS_PATH) as positive_words_doc:
             self.positive_words = list(line.rstrip() for line in positive_words_doc)
@@ -25,13 +28,16 @@ class SinaAPIRequest:
 
     def getPolarityWeibo(self, polarity):
         polarity_words = []
-        weibo_file = ""
-        if polarity == 'positive':
+        weibo_training_file = ""
+        weibo_test_file = ""
+        if polarity == 'pos':
             polarity_words = self.positive_words
-            weibo_file = open(CURRENT_DIR_PATH + POSITIVE_WEIBO_PATH, 'w+')
+            weibo_training_file = open(CURRENT_DIR_PATH + POSITIVE_WEIBO_TRAINING_PATH, 'a+')
+            weibo_test_file = open(CURRENT_DIR_PATH + POSITIVE_WEIBO_TEST_PATH, 'a+')
         else:
             polarity_words = self.negative_words
-            weibo_file = open(CURRENT_DIR_PATH + NEGATIVE_WEIBO_PATH, 'w+')
+            weibo_training_file = open(CURRENT_DIR_PATH + NEGATIVE_WEIBO_TRAINING_PATH, 'a+')
+            weibo_test_file = open(CURRENT_DIR_PATH + NEGATIVE_WEIBO_TEST_PATH, 'a+')
         for word in polarity_words:
             topic = urllib.parse.urlencode({'q': word})
             for i in range(1, 5):
@@ -39,11 +45,15 @@ class SinaAPIRequest:
                 url = URL_PREFIX + '?' + topic + '&page=' + page + '&count=' + COUNT + '&access_token=' + ACCESS_TOKEN
                 weibo = urllib.request.urlopen(url).read().decode()
                 weibo_json = json.loads(weibo)
-                rows = 0
+                training = True
                 for user in weibo_json['statuses']:
-                    rows = rows + 1
                     text = user['text']
-                    weibo_file.write(text + '\n')
+                    if training = True:
+                        weibo_training_file.write(text+ '\n')
+                        training = False
+                    else:
+                        weibo_test_file.write(text + '\n')  
+                        training = True 
         weibo_file.close()
 
 
