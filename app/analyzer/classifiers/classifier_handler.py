@@ -45,7 +45,23 @@ def pickle_words_features(microblogType):
         all_words.extend(microblog.words)
     all_words = nltk.FreqDist(all_words)
 
-    words_features = list(all_words.keys())[:1400]
+    words_features = list(all_words.keys())
+    # pos_microblogs = Microblog.objects(microblogType=microblogType, polarity='pos')
+    # neg_microblogs = Microblog.objects(microblogType=microblogType, polarity='neg')
+    #
+    # all_pos_words, all_neg_words = [], []
+    # for microblog in pos_microblogs:
+    #     all_pos_words.extend(microblog.words)
+    # all_pos_words = nltk.FreqDist(all_pos_words)
+    #
+    # for microblog in neg_microblogs:
+    #     all_neg_words.extend(microblog.words)
+    # all_neg_words = nltk.FreqDist(all_neg_words)
+    #
+    # words_pos_features = list(all_pos_words.keys())[:1000]
+    # words_neg_features = list(all_neg_words.keys())[:1000]
+    # words_pos_features.extend(words_neg_features)
+    # words_features = words_pos_features
 
     with open(WORDS_FEATURES_PATH, 'wb') as output_file:
         pickle.dump(words_features, output_file)
@@ -78,7 +94,7 @@ def get_feature_set(microblogType):
 
     words_features = get_words_features_pickle()
 
-    feature_sets = [(feature_filter(microblog.words, words_features), microblog.polarity) for microblog in microblogs]
+    feature_sets = [(feature_filter(microblog.words,  words_features), microblog.polarity) for microblog in microblogs]
 
     random.shuffle(feature_sets)
 
@@ -138,7 +154,7 @@ def save_testing_result(classifier, test_feats, classifier_name):
 
     overall_precision = overall_score_calculator(pos_precision, neg_precision, pos_count, neg_count)
     overall_recall = overall_score_calculator(pos_recall, neg_recall, pos_count, neg_count)
-    overall_f_score = overall_score_calculator(pos_f_score, neg_f_score, pos_count, neg_count)
+    overall_f_score = round(2*(overall_precision*overall_recall) / (overall_precision + overall_recall), 2)
 
     # accuracy = (nltk.classify.accuracy(classifier, test_feats)) * 100
 
@@ -150,13 +166,42 @@ def save_testing_result(classifier, test_feats, classifier_name):
 
 
 def baseline_method():
+    microblogs = Microblog.objects(microblogType='training')
+    refsets = defaultdict(set)
+    testsets = defaultdict(set)
+
+    for i, microblog in enumerate(microblogs):
+        refsets[microblog.polarity].add(i)
+        if microblog.negCount > microblog.posCount:
+            testsets['neg'].add(i)
+        else:
+            testsets['pos'].add(i)
+    pos_count, neg_count = len(refsets['pos']), len(refsets['neg'])
+    pos_precision, pos_recall, pos_f_score = sub_score_calculator('pos', refsets, testsets)
+    neg_precision, neg_recall, neg_f_score = sub_score_calculator('neg', refsets, testsets)
+
+    overall_precision = overall_score_calculator(pos_precision, neg_precision, pos_count, neg_count)
+    overall_recall = overall_score_calculator(pos_recall, neg_recall, pos_count, neg_count)
+    overall_f_score = round(2*(overall_precision*overall_recall) / (overall_precision + overall_recall), 2)
+
+    # print(overall_precision)
+    # accuracy = (nltk.classify.accuracy(classifier, test_feats)) * 100
+
+    testResult = TestResult(classifier='Baseline',  pos_count=pos_count, neg_count=neg_count,
+                            pos_precision=pos_precision, pos_recall=pos_recall, pos_f_score=pos_f_score,
+                            neg_precision=neg_precision, neg_recall=neg_recall, neg_f_score=neg_f_score,
+                            precision=overall_precision, recall=overall_recall, f_score=overall_f_score)
+    testResult.save()
 
 
 def classify_testing():
 
+
     test_set = get_pickle_feature_set()
     random.shuffle(test_set)
     test_set = test_set[:2000]
+
+    baseline_method()
 
     for (name, input_path) in classifier_path_list:
         with open(input_path, 'rb') as input_classifier:
