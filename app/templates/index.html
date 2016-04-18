@@ -11,7 +11,6 @@
               <thead>
               <tr>
                   <th>Classifier</th>
-                  <th>Accuracy</th>
                   <th>Overall Fscore</th>
                   <th>Overall Precision</th>
                   <th>Overall recall</th>
@@ -29,7 +28,6 @@
               {% for result in testResults%}
               <tr>
                   <td>{{ result.classifier }}</td>
-                  <td>{{ result.accuracy }}</td>
                   <td>{{ result.f_score }}</td>
                   <td>{{ result.precision }}</td>
                   <td>{{ result.recall }}</td>
@@ -47,6 +45,66 @@
               </tbody>
           </table>
         </span>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 ">
+        <div class="page-header">
+            <h1>Our Approach</h1>
+            <div>
+                <div class="page-header">
+                    <div><h4>Dataset : Collect microblogs with SinaApi</h4></div>
+                    <div><h4>Annotation: Categorize each microblog's polarity with Hashtag (xxx positive, xxx negative)</h4></div>
+
+                </div>
+                <div class="page-header">
+                    <h3>1. Filter Data</h3>
+                    <div>
+                        <h4>1.1 Remove URLs</h4>
+                        <script src="https://gist.github.com/cxtadment/e3aaaa1e5e59ba4a2ae279ca4d469ecc.js"></script>
+                    </div>
+                    <div>
+                        <h4>1.2 Convert Chinese Punctuations</h4>
+                        <script src="https://gist.github.com/cxtadment/1ba5471704840fc0318ded0edca1fb82.js"></script>
+                    </div>
+                    <div>
+                        <h4>1.3 Remove "@" and its following screen name</h4>
+                        <script src="https://gist.github.com/cxtadment/94bcf6e0cb58e1866fb44e9dfe99aa6c.js"></script>
+                    </div>
+                    <div>
+                        <h4>1.4 Remove "//" retweet </h4>
+                        <script src="https://gist.github.com/cxtadment/578875b4dbbd5b11966823dee1ee2396.js"></script>
+                    </div>
+                    <div>
+                        <h4>1.5 Remove "()" original content source </h4>
+                        <script src="https://gist.github.com/cxtadment/b80b328ac852090d8ed776d3e955e790.js"></script>
+                    </div>
+                    <div>
+                        <h4>1.6 Remove "#" Hashtag and its following topic</h4>
+                        <script src="https://gist.github.com/cxtadment/eb3ee44cd87c4055ee849f8a3b4ec4e1.js"></script>
+                    </div>
+
+                </div>
+                <div>
+                    <h3>2. Feature Extraction</h3>
+                    <div>
+                        <h4>2.1 Rule out stop words and digits</h4>
+                        <script src="https://gist.github.com/cxtadment/7815ab31f0ed129e55f725ddc0bff867.js"></script>
+                    </div>
+                    <div>
+                        <h4>2.2 POS Tagging with Jieba</h4>
+                        <script src="https://gist.github.com/cxtadment/0ad3b6bb79f2896e95e579cde1b4c929.js"></script>
+                    </div>
+                    <div>
+                        <h4>2.3 Polarity Count with NTUSD</h4>
+                        <script src="https://gist.github.com/cxtadment/5ac38704c0c3b5d0c27d78cd4a0e30bc.js"></script>
+                    </div>
+                    <div>
+                        <h4>2.4 Bag of words </h4>
+                        <script src="https://gist.github.com/cxtadment/2e364d957f5fd586f9c6b3f9931ef7c3.js"></script>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}

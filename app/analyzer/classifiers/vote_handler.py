@@ -2,7 +2,8 @@ from statistics import mode
 from nltk.classify import ClassifierI
 
 class VoteClassifier(ClassifierI):
-    def __inti__(self, *classifiers):
+
+    def __init__(self, *classifiers):
         self._classifiers = classifiers
 
     def classify(self, features):
