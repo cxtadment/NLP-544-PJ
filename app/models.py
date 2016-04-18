@@ -76,6 +76,16 @@ class SearchResult(db.Document):
     polarity = db.StringField()
     confidence = db.FloatField()
     words = db.ListField(db.StringField())
+    filter_text = db.StringField()
+
+    def serialize(self):
+        return {
+            'text': self.text,
+            'polarity': self.polarity,
+            'confidence': self.confidence,
+            'words': self.words,
+            'filter_text': self.filter_text,
+        }
 
 
 class TestDict(db.Document):
