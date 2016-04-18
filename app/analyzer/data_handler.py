@@ -56,9 +56,9 @@ def api_microblog_data_handler(keyword):
     feature_extractor = FeatureExtractor()
     result = []
     for text in microblogs_text:
-        text = text_filters(text)
-        words, taggings = feature_extractor.pos_tagging(text)
-        result.append((text, words, taggings))
+        filter_text = text_filters(text)
+        words, taggings = feature_extractor.pos_tagging(filter_text)
+        result.append((text, filter_text, words, taggings))
 
     return result
 
