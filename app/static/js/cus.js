@@ -53,15 +53,15 @@ $( document ).ready(function() {
         });
         polarityHtml = ''
         if (polarity == 'pos') {
-            polarityHtml += '<a href="#" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-thumbs-up"></span> Positive</a>'
+            polarityHtml += '<span class="btn btn-info btn-sm item-text4"><span class="glyphicon glyphicon-thumbs-up"></span> Positive</span>'
         } else if (polarity == 'neg') {
-            polarityHtml += '<a href="#" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-thumbs-down"></span> Negative</a>'
+            polarityHtml += '<span class="btn btn-danger btn-sm item-text4"><span class="glyphicon glyphicon-thumbs-down"></span> Negative</span>'
         }
         keywordsHtml += '</span>'
         contentHtml = '<div class="list-group result-display"><a href="#" class="list-group-item list-display">'
         contentHtml += '<div class="item">Microblog Origin Text: <span class="item-text1">'+text+'</span></div>'
         contentHtml += '<div class="item">Microblog Text After filter: <span class="item-text2">'+filter_text+'</span></div>'
-        contentHtml += '<div class="item">Polarity: '+polarityHtml+'</div>'
+        contentHtml += '<div class="item polarity"><span>Polarity: </span>'+polarityHtml+'</div>'
         contentHtml += '<div class="item">Confidence <span class="item-text3">:'+confidence+'%</span></div>'
         contentHtml += '<div class="item">Keywords:'+keywordsHtml+'</div>'
         contentHtml += '</a></div>'
