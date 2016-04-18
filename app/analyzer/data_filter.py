@@ -4,7 +4,7 @@ import re
 import codecs
 import sys
 import os
-
+import string
 # start of tokenization
 # convert chinese punctuation to engnish version
 
@@ -150,39 +150,33 @@ def read_and_filter_data(microblog_type):
 
     return weibo_dict
 
-def read_and_filter_api_microblog_data(polarity):
-	input_path = ""
-	if polarity == 'positive':
-		input_path = POSITIVE_WEIBO_PATH
-	else:
-		input_path = NEGATIVE_WEIBO_PATH
-	with open(input_path) as microblogs_file:
-		pos_results, neg_results = [], []
-		weibo_id = 1
-		for text in microblogs_file:
-			cur_list = []
-			text = text.rstrip()
-			# tokenization start-------------------------------
-            text = text.replace(' ', '')
-            text = removeLink(text)
-            text = convertPun(text)
-            text = removeTopic(text)
-            text = removeBracket(text)
-            text = removePrivate(text)
-           	text = removeForward(text)
-            text = text.replace(' ', '')
-            # tokenization end----------------------------------
-            cur_list.append(weibo_id)
+def read_and_filter_api_microblog_data():
+    input_positive_path = CURRENT_DIR_PATH + POSITIVE_WEIBO_PATH
+    input_negative_path = CURRENT_DIR_PATH + NEGATIVE_WEIBO_PATH
+    pos_results = read_and_filter_api_microblog_data_polarity(input_positive_path, 'positive')
+    neg_results = read_and_filter_api_microblog_data_polarity(input_negative_path, 'negative')
+    weibo_dict = {}
+    weibo_dict['positive'] = pos_results
+    weibo_dict['negative'] = neg_results
+    return weibo_dict
+
+def read_and_filter_api_microblog_data_polarity(input_path, polarity):
+    polarity_results = []
+    with open(input_path) as microblogs_file:
+        pos_results, neg_results = [], []
+        weibo_id = 1
+        for text in microblogs_file:
+            cur_list = []
+            text = text.rstrip()
+            text = text_filters(text)
+            cur_list.append(str(weibo_id))
             cur_list.append(text)
-            if polarity == 'positive':
-            	pos_results.append(cur_list)
-            else:
-            	neg_results.append(cur_list)
+            cur_list.append(polarity)
+            polarity_results.append(cur_list)
             weibo_id = weibo_id + 1
-        weibo_dict = {}
-        weibo_dict['positive'] = pos_results
-        weibo_dict['negative'] = neg_results
-    return weibo_dict        
+    return polarity_results             
+        
+
 
 
 

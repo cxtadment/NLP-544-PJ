@@ -66,13 +66,8 @@ def api_microblog_data_handler(keyword):
 
 def microblog_data_handler(microblog_type):
 
-    microblogs = read_and_filter_data(microblog_type)
-<<<<<<< HEAD
-    # microblogs = read_and_filter_api_microblog_data(microblog_type)
-    feature_extractor = FeatureExtractor()
-=======
-
->>>>>>> c9f9d5bcc4de66437717f86ec29d3781384eefeb
+    # microblogs = read_and_filter_data(microblog_type)
+    microblogs = read_and_filter_api_microblog_data()
     result = []
 
     feature_extractor = FeatureExtractor()
