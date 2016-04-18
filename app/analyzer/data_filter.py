@@ -130,7 +130,7 @@ def read_and_filter_microblog_data(input_path, pos_list, neg_list):
                 neg_results.append(cur_list)
 
         weibo_dict = {}
-        weibo_dict['positive'], weibo_dict['negative'] = pos_results, neg_results
+        weibo_dict['pos'], weibo_dict['neg'] = pos_results, neg_results
 
         return weibo_dict
 

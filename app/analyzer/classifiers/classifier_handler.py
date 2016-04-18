@@ -68,6 +68,10 @@ def feature_filter(document, words_features):
     return features
 
 
+# def get_feature_set_for_api(words, words_features):
+
+
+
 def get_feature_set(microblogType):
 
     microblogs = Microblog.objects(microblogType=microblogType)
@@ -154,18 +158,22 @@ def classify_testing():
     # save_testing_result(voted_classifier, test_set, 'All in one classifier')
 
 
+def get_classifier(classifier_path):
+    with open(classifier_path, 'rb') as input_classifier:
+        classifier = pickle.load(input_classifier)
+        return classifier
+
+
 class ApiClassifier:
 
     def __init__(self):
-        self.all_classifiers = []
-        for (name, input_path) in classifier_path_list:
-            with open(input_path, 'rb') as input_classifier:
-                classifier = pickle.load(input_classifier)
-                self.all_classifiers.append(classifier)
-        self.vote_classifier = VoteClassifier(self.all_classifiers)
+        self.nb_classifier, self.mu_nb_classifier, self.be_nb_classifier = get_classifier(ORIGIN_NB_PATH), get_classifier(MULTINOMIAL_NB_PATH), get_classifier(BERNOULLI_NB_PATH)
+        self.lg_re_classifier, self.perceptron = get_classifier(LOGISTIC_REGRESSION_PATH), get_classifier(PERCEPTRON_PATH)
+        self.li_svc_classifier, self.random_forest_classifier = get_classifier(LINEAR_SVC_PATH), get_classifier(RANDOM_FOREST_PATH)
+        self.vote_classifier = VoteClassifier(self.nb_classifier, self.mu_nb_classifier, self.be_nb_classifier,
+                                              self.lg_re_classifier, self.perceptron, self.li_svc_classifier, self.random_forest_classifier)
 
     def classify(self, microblogs):
-
         searchResults = []
         words_features = get_words_features_pickle()
         for (text, words, taggings) in microblogs:
