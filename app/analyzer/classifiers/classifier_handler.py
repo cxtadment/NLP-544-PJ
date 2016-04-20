@@ -62,15 +62,15 @@ def feature_filter(document, words_features):
 
 # def get_feature_set_for_api(words, words_features):
 
-def pickle_feature_set(feature_set):
-    with open(FEATURE_SET_PATH, 'wb') as output_file:
-        pickle.dump(feature_set, output_file)
-
-
-def get_pickle_feature_set():
-    with open(FEATURE_SET_PATH, 'rb') as input_file:
-        feature_set = pickle.load(input_file)
-        return feature_set
+# def pickle_feature_set(feature_set):
+#     with open(FEATURE_SET_PATH, 'wb') as output_file:
+#         pickle.dump(feature_set, output_file)
+#
+#
+# def get_pickle_feature_set():
+#     with open(FEATURE_SET_PATH, 'rb') as input_file:
+#         feature_set = pickle.load(input_file)
+#         return feature_set
 
 
 def get_feature_set(microblogType):
@@ -127,7 +127,7 @@ def save_testing_result(classifier, test_feats, classifier_name):
         observed = classifier.classify(feats)
         testsets[observed].add(i)
 
-    pos_count, neg_count  = len(refsets['pos']), len(refsets['neg'])
+    pos_count, neg_count = len(refsets['pos']), len(refsets['neg'])
     pos_precision, pos_recall, pos_f_score = sub_score_calculator('pos', refsets, testsets)
     neg_precision, neg_recall, neg_f_score = sub_score_calculator('neg', refsets, testsets)
 
