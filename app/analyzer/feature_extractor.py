@@ -63,9 +63,8 @@ class FeatureExtractor:
         # filter element containing number
         if re.match('^(?=.*\\d)', word):
             return False
-        # if the word is in the topics
-        # if word in self.topics:
-        #     return False
+        if word in self.topics:
+            return False
         return True
 
     """

@@ -81,6 +81,7 @@ def get_feature_set(microblogType):
 
     feature_sets = [(feature_filter(microblog.words,  words_features), microblog.polarity) for microblog in microblogs]
 
+
     return feature_sets
 
 
@@ -178,6 +179,7 @@ def classify_testing():
     test_set = get_feature_set('testing')
 
     # baseline_method()
+
 
     for (name, input_path) in classifier_path_list:
         with open(input_path, 'rb') as input_classifier:
