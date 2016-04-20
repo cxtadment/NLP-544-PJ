@@ -2,7 +2,7 @@
 
 from flask.ext.script import Manager, Server
 from app import create_app
-from app.analyzer.classifiers.classifier_handler import module_build, classify_testing, baseline_method
+from app.analyzer.classifiers.classifier_handler import module_build, classify_testing
 from app.analyzer.data_handler import hashtag_data_handler, microblog_data_handler, emoticon_data_handler
 from app.analyzer.feature_extractor import FeatureExtractor
 from app.models import Hashtag, Microblog, Emoticon, TestDict, TestResult
