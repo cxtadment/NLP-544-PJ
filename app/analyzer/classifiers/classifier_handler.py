@@ -175,7 +175,6 @@ def save_testing_result(classifier, test_feats, classifier_name):
 
 def classify_testing():
 
-
     test_set = get_feature_set('testing')
 
     # baseline_method()
