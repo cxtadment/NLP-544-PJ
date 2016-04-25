@@ -23,7 +23,10 @@ LOGISTIC_REGRESSION_PATH = CURRENT_DIR_PATH + 'logisticRegression.pickle'
 PERCEPTRON_PATH = CURRENT_DIR_PATH + 'perceptron.pickle'
 LINEAR_SVC_PATH = CURRENT_DIR_PATH + 'linearSVC.pickle'
 RANDOM_FOREST_PATH = CURRENT_DIR_PATH + 'random_forest.pickle'
-
+NEGATIVE_WORDS_PATH = CURRENT_DIR_PATH + 'sentiment_zh/combineNegative'
+POSITIVE_WORDS_PATH = CURRENT_DIR_PATH + 'sentiment_zh/combinePositive'
+POSITIVE_EMOTICONS_PATH = CURRENT_DIR_PATH + 'sentiment_zh/positive_emoticons'
+NEGATIVE_EMOTICONS_PATH = CURRENT_DIR_PATH + 'sentiment_zh/negative_emoticons'
 classifier_path_list = [('origin_nb', ORIGIN_NB_PATH), ('multinomial_nb', MULTINOMIAL_NB_PATH), ('bernoulli_nb', BERNOULLI_NB_PATH),
                         ('logistic_regression', LOGISTIC_REGRESSION_PATH), ('perceptron', PERCEPTRON_PATH), ('linear_svc', LINEAR_SVC_PATH),
                         ('random_forest', RANDOM_FOREST_PATH)]
@@ -163,6 +166,96 @@ def get_classifier(classifier_path):
         classifier = pickle.load(input_classifier)
         return classifier
 
+"""
+
+retrieve pattern
+
+"""
+
+def pattern_induct(self, microblog_list):
+    polarity_pattern_dict = {}
+    for microblog in microblog_list:
+        polarity = microblog[2]
+        pattern_dict = polarity_pattern_dict[polarity]
+        word_list = microblog[5]
+        tag_list =  microblog[6]
+        for i in range(0, len(tag_list)):
+            cur_word = word_list[i]
+            if i >= 2:
+                first_tag = tag_list[i-2]
+                second_tag = tag_list[i-1]
+                cur_tag = tag_list[i]
+                first_word = word_list[i-2]
+                second_word = word_list[i-1]
+                
+                if first_tag == 'AD' and second_tag == 'VA' and cur_tag == 'SP':
+                    if cur_word in pattern_dict:
+                        pattern_dict[cur_word] = pattern_dict[cur_word] + 1
+                    else:
+                        pattern_dict[cur_word] = 1
+            if cur_word in positive_words or cur_word in negative_words:
+                if cur_word in pattern_dict:
+                    pattern_dict[cur_word] = pattern_dict[cur_word] + 1
+                else:
+                    pattern_dict[cur_word] = 1
+        polarity_pattern_dict[polarity] = pattern_dict
+    # sort polarity_pattern_dict
+    positive_pattern_dict = polarity_pattern_dict['pos']
+    negative_pattern_dict = polarity_pattern_dict['neg']
+    sorted_positive_pattern_pq = queue.PriorityQueue()
+    sorted_negative_pattern_pq = queue.PriorityQueue()
+    for key, value in positive_pattern_dict.iteritems():
+        sorted_positive_pattern_pq.put(key, value)
+    for key, value in negative_pattern_dict.iteritems():
+        sorted_negative_pattern_pq.put(key, value)    
+    sorted_positive_pattern_dict = {}
+    sorted_negative_pattern_dict = {}
+    while len(sorted_positive_pattern_pq) <= 100:
+        pattern = sorted_positive_pattern_pq.get()
+        sorted_positive_pattern_dict[pattern] = positive_pattern_dict[pattern]
+    while len(sorted_negative_pattern_pq) <= 100:
+        pattern = sorted_negative_pattern_pq.get()
+        sorted_negative_pattern_dict[pattern] = negative_pattern_dict[pattern]
+
+    polarity_pattern_dict['pos'] = positive_pattern_dict
+    polarity_pattern_dict['neg'] = negative_pattern_dict 
+    return polarity_pattern_dict
+
+"""
+
+retrieve emoticons
+
+"""
+
+def emoticon_retrieve(self, microblog_list):
+    possitive_emoticon_count_dict = {}
+    negative_emoticon_count_dict = {}
+    for microblog in microblog_list:
+        text_list = microblog[1]
+        emoticons = re.findall(u"\[[\w\u0000-\u9FFF]+\]", content)
+        polarity = microblog[2]
+        for emoticon in emoticons:
+            if polarity == 'pos' and emoticon in self.positive_emoticons_dict:
+                if emoticon in possitive_emoticon_count_dict:
+                    possitive_emoticon_count_dict[emoticon] = possitive_emoticon_count_dict[emoticon] + 1
+                else:
+                    possitive_emoticon_count_dict[emoticon] = 1    
+            elif polarity == 'neg' and emoticon in self.negative_emoticons_dict:
+                if emoticon in negative_emoticon_count_dict:
+                    negative_emoticon_count_dict[emoticon] = negative_emoticon_count_dict[emoticon] + 1
+                else:
+                    negative_emoticon_count_dict[emoticon] = 1        
+        # add-one smoothing
+        for possitive_emoticon in self.positive_emoticons_dict:
+            if not possitive_emoticon in possitive_emoticon_count_dict:
+                possitive_emoticon_count_dict[emoticon] = 1
+        for negative_emoticon in self.negative_emoticons_dict:
+            if not negative_emoticon in negative_emoticon_count_dict:
+                negative_emoticon_count_dict[emoticon] = 1
+
+        emoticon_count_dict['pos'] = possitive_emoticon_count_dict
+        emoticon_count_dict['neg'] = negative_emoticon_count_dict
+        return emoticon_count_dict 
 
 class ApiClassifier:
 
@@ -172,7 +265,15 @@ class ApiClassifier:
         self.li_svc_classifier, self.random_forest_classifier = get_classifier(LINEAR_SVC_PATH), get_classifier(RANDOM_FOREST_PATH)
         self.vote_classifier = VoteClassifier(self.nb_classifier, self.mu_nb_classifier, self.be_nb_classifier,
                                               self.lg_re_classifier, self.perceptron, self.li_svc_classifier, self.random_forest_classifier)
-
+        with open(NEGATIVE_WORDS) as negative_words_doc:
+            self.negative_words = set([line.rstrip() for line in negative_words_doc])
+        with open(POSITIVE_WORDS_PATH) as positive_words_doc:
+            self.positive_words = set([line.rstrip() for line in positive_words_doc]) 
+        with open(POSITIVE_EMOTICONS_PATH) as positive_emoticons_doc:
+            self.positive_emoticons_dict = set([line.rstrip() for line in positive_emoticons_doc])
+        with open(NEGATIVE_EMOTICONS_PATH) as negative_emoticons_doc:
+            self.negative_emoticons_dict = set([line.rstrip() for line in negative_emoticons_doc]) 
+            
     def classify(self, microblogs):
         searchResults = []
         words_features = get_words_features_pickle()

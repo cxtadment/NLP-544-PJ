@@ -9,12 +9,12 @@ import os
 ACCESS_TOKEN = "2.00Pz6y6GQtNpcB9d1129ca42xhgIHD"
 URL_PREFIX = "https://api.weibo.com/2/search/topics.json"
 CURRENT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/resources/polarity/'
-POSITIVE_WORDS_PATH = "positive_words.txt"
-NEGATIVE_WORDS_PATH = "negative_words.txt"
-POSITIVE_WEIBO_TRAINING_PATH = "positive_weibo_training.txt"
-NEGATIVE_WEIBO_TRAINING_PATH = "negative_weibo_training.txt"
-POSITIVE_WEIBO_TEST_PATH = "positive_weibo_test.txt"
-NEGATIVE_WEIBO_TEST_PATH = "negative_weibo_test.txt"
+POSITIVE_WORDS_PATH = "positive_events.txt"
+NEGATIVE_WORDS_PATH = "negative_events.txt"
+POSITIVE_WEIBO_TRAINING_PATH = "positive_event_weibo_training.txt"
+NEGATIVE_WEIBO_TRAINING_PATH = "negative_event_weibo_training.txt"
+POSITIVE_WEIBO_TEST_PATH = "positive_event_weibo_test.txt"
+NEGATIVE_WEIBO_TEST_PATH = "negative_event_weibo_test.txt"
 COUNT = "50"
 
 

@@ -11,10 +11,10 @@ import string
 TRAINING_INPUT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/resources/data/SIGHAN8-Task2-Corpus-Release/'
 TESTING_INPUT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/resources/data/SIGHAN8-Task2-Corpus/'
 CURRENT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/resources/polarity/'
-POSITIVE_WEIBO_TRAINING_PATH = "positive_weibo_training.txt"
-NEGATIVE_WEIBO_TRAINING_PATH = "negative_weibo_training.txt"
-POSITIVE_WEIBO_TEST_PATH = "positive_weibo_test.txt"
-NEGATIVE_WEIBO_TEST_PATH = "negative_weibo_test.txt"
+POSITIVE_WEIBO_TRAINING_PATH = "positive_event_weibo_training.txt"
+NEGATIVE_WEIBO_TRAINING_PATH = "negative_event_weibo_training.txt"
+POSITIVE_WEIBO_TEST_PATH = "positive_event_weibo_test.txt"
+NEGATIVE_WEIBO_TEST_PATH = "negative_event_weibo_test.txt"
 
 def convertPun(content):
     punctuation_list = ['，', '。', '？', '！', '……', ':', '「', '」', '.....', '】', '：', '、']

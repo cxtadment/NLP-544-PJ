@@ -3,12 +3,16 @@ import jieba
 import os
 import jieba.posseg as pseg
 import re
+import operator
+import Queue as queue
 
 CURRENT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/resources/'
 INPUT_POS_PATH = CURRENT_DIR_PATH + 'sentiment_zh/combinePositive.txt'
 INPUT_NEG_PATH = CURRENT_DIR_PATH + 'sentiment_zh/combineNegative.txt'
 STOPWORDS_PATH = CURRENT_DIR_PATH + 'segment_filter/chinese_stopwords.txt'
 TOPICS_PATH = CURRENT_DIR_PATH + 'segment_filter/topics.txt'
+
+
 ESCAPE_WORDS = ['不']
 
 class FeatureExtractor:
@@ -26,6 +30,7 @@ class FeatureExtractor:
                 segment_list=list(jieba.cut(line.rstrip()))
                 for segment in segment_list:
                     self.topics.add(segment)
+                            
 
     """
 
@@ -84,6 +89,18 @@ class FeatureExtractor:
                 words.append(word)
                 taggings.append(tagging)
         return words, taggings
+
+          
+
+
+
+
+
+
+
+
+
+                            
 
 
 

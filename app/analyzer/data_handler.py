@@ -79,7 +79,8 @@ def microblog_data_handler(microblog_type):
             microblogId, microblog_text, polarity = microblog[0], microblog[1], microblog[2]
             posCount, negCount = feature_extractor.polarity_count(microblog_text)
             words, taggings = feature_extractor.pos_tagging(microblog_text)
-            
+            polarity_pattern_dict = feature_extractor.pattern_induct()
+            emoticon_count_dict = feature_extractor.pattern_induct()
             single_microblog = Microblog(microblogId=microblogId, text=microblog_text, polarity=polarity, negCount=negCount,
                                          posCount=posCount, words=words, taggings=taggings, microblogType=microblog_type, topic='', sentiment='')
             result.append(single_microblog)
