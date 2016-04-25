@@ -12,14 +12,15 @@ class VoteClassifier(ClassifierI):
         for c in self._classifiers:
             v = c.classify(features)
             votes.append(v)
-        return mode(votes)
+        polarity = max(set(votes), key=votes.count)
+        return polarity
 
     def confidence(self, features):
         votes = []
         for c in self._classifiers:
             v = c.classify(features)
             votes.append(v)
-
-        chooice_votes = votes.count(mode(votes))
+        polarity = max(set(votes), key=votes.count)
+        chooice_votes = votes.count(polarity)
         conf = chooice_votes / len(votes)
         return conf
