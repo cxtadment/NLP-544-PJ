@@ -35,6 +35,9 @@ class Microblog(db.Document):
     posCount = db.IntField()
     taggings = db.ListField(db.StringField())
     words = db.ListField(db.StringField())
+    extra_features = db.ListField(db.StringField())
+    new_words = db.ListField(db.StringField())
+    new_taggings = db.ListField(db.StringField())
 
     def __str__(self):
         return "microblogId: %s, text: %s, polarity: %s, microblogType: %s, topic: %s, sentiment: %s" % (self.microblogId, self.text, self.polarity, self.microblogType, self.topic, self.sentiment)

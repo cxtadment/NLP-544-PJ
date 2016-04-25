@@ -24,7 +24,6 @@ $( document ).ready(function() {
             microblogs = data.result;
             all_html = ''
             $.each(microblogs, function(k, v){
-                console.log(v)
                 text = v.text
                 filter_text = v.filter_text
                 confidence = v.confidence
@@ -48,9 +47,11 @@ $( document ).ready(function() {
             });
             polarityHtml = ''
             if (polarity == 'pos') {
-                polarityHtml += '<span class="btn btn-info btn-sm item-text4"><span class="glyphicon glyphicon-thumbs-up"></span> Positive</span>'
+                polarityHtml += '<span class="btn btn-success btn-sm item-text4"><span class="glyphicon glyphicon-thumbs-up"></span> Positive</span>'
             } else if (polarity == 'neg') {
                 polarityHtml += '<span class="btn btn-danger btn-sm item-text4"><span class="glyphicon glyphicon-thumbs-down"></span> Negative</span>'
+            } else if (polarity == 'neu') {
+                polarityHtml += '<span class="btn btn-info btn-sm item-text4"><span class="glyphicon glyphicon-resize-horizontal"></span> Neutral</span>'
             }
             keywordsHtml += '</span>'
             contentHtml = '<div class="list-group result-display"><a href="#" class="list-group-item list-display">'
