@@ -3,12 +3,12 @@ import os
 import nltk
 from nltk.metrics import precision, recall, f_measure
 import pickle
-from app.analyzer.classifiers.classifiers import origin_nb_classifier, multinomial_nb_classifer, bernoulli_nb_classifer, \
-    logistic_regression_classifier, perceptron_classifier, linearSVC_classifier, random_forest_classifier
+from app.analyzer.classifiers.classifiers import origin_nb_classifier, multinomial_nb_classifer, \
+    logistic_regression_classifier, linearSVC_classifier, random_forest_classifier
 from app.analyzer.classifiers.vote_handler import VoteClassifier
 from app.models import TestResult, Microblog, SearchResult
 from collections import defaultdict
-import random
+
 
 
 CURRENT_DIR_PATH = os.path.dirname(os.path.dirname(__file__)) + '/pickles/'
@@ -27,20 +27,12 @@ NEGATIVE_WORDS_PATH = CURRENT_DIR_PATH + 'sentiment_zh/combineNegative'
 POSITIVE_WORDS_PATH = CURRENT_DIR_PATH + 'sentiment_zh/combinePositive'
 POSITIVE_EMOTICONS_PATH = CURRENT_DIR_PATH + 'sentiment_zh/positive_emoticons'
 NEGATIVE_EMOTICONS_PATH = CURRENT_DIR_PATH + 'sentiment_zh/negative_emoticons'
-classifier_path_list = [('origin_nb', ORIGIN_NB_PATH), ('multinomial_nb', MULTINOMIAL_NB_PATH), ('bernoulli_nb', BERNOULLI_NB_PATH),
-                        ('logistic_regression', LOGISTIC_REGRESSION_PATH), ('perceptron', PERCEPTRON_PATH), ('linear_svc', LINEAR_SVC_PATH),
-                        ('random_forest', RANDOM_FOREST_PATH)]
+
+classifier_path_list = [('Naive Bayes', ORIGIN_NB_PATH), ('Multinomial Naive Bayes', MULTINOMIAL_NB_PATH),
+                        ('Logistic Regression', LOGISTIC_REGRESSION_PATH), ('Linear SVC', LINEAR_SVC_PATH),
+                        ('Random Forest', RANDOM_FOREST_PATH)]
 
 TAGGING_CHOOSE = set(['nr', 'n', 'ul'])
-
-# for t in range(len(microblog.words)):
-        #     if microblog.taggings[t] in TAGGING_CHOOSE:
-        #         all_noun_words.extend(microblog.words[t])
-        #     elif microblog.taggings[t] == 'a':
-        #         all_adj_words.extend(microblog.words[t])
-
-    # all_noun_words = nltk.FreqDist(all_noun_words)
-    # all_adj_words = nltk.FreqDist(all_adj_words)
 
 
 def get_words_features_pickle():
@@ -56,7 +48,7 @@ def pickle_words_features(microblogType):
         all_words.extend(microblog.words)
     all_words = nltk.FreqDist(all_words)
 
-    words_features = list(all_words.keys())[:1500]
+    words_features = list(all_words.keys())[:3000]
 
     with open(WORDS_FEATURES_PATH, 'wb') as output_file:
         pickle.dump(words_features, output_file)
@@ -71,17 +63,14 @@ def feature_filter(document, words_features):
     return features
 
 
-# def get_feature_set_for_api(words, words_features):
-
-
-
 def get_feature_set(microblogType):
 
-    microblogs = Microblog.objects(microblogType=microblogType)
+    microblogs = Microblog.objects()
 
     words_features = get_words_features_pickle()
 
-    feature_sets = [(feature_filter(microblog.words, words_features), microblog.polarity) for microblog in microblogs]
+    feature_sets = [(feature_filter(microblog.words,  words_features), microblog.polarity) for microblog in microblogs]
+
 
     return feature_sets
 
@@ -94,11 +83,11 @@ def module_build():
     #naive bayes classifiers
     origin_nb_classifier(train_set, ORIGIN_NB_PATH)
     multinomial_nb_classifer(train_set, MULTINOMIAL_NB_PATH)
-    bernoulli_nb_classifer(train_set, BERNOULLI_NB_PATH)
+    # bernoulli_nb_classifer(train_set, BERNOULLI_NB_PATH)
 
     #linear classifiers
     logistic_regression_classifier(train_set, LOGISTIC_REGRESSION_PATH)
-    perceptron_classifier(train_set, PERCEPTRON_PATH)
+    # perceptron_classifier(train_set, PERCEPTRON_PATH)
 
     #svm classifiers
     linearSVC_classifier(train_set, LINEAR_SVC_PATH)
@@ -107,8 +96,8 @@ def module_build():
     random_forest_classifier(train_set, RANDOM_FOREST_PATH)
 
 
-def overall_score_calculator(pos, neg, pos_count, neg_count):
-    return round(float((pos*pos_count + neg*neg_count) / (pos_count + neg_count)), 2)
+def overall_score_calculator(pos, neg, neu, pos_count, neg_count, neu_count):
+    return round(float((pos*pos_count + neg*neg_count + neu*neu_count) / (pos_count + neg_count + neu_count)), 2)
 
 
 def sub_score_calculator(label, refsets, testsets):
@@ -117,6 +106,25 @@ def sub_score_calculator(label, refsets, testsets):
     res_f_score = f_measure(refsets[label], testsets[label])
 
     return round(res_precision, 2), round(res_recall, 2), round(res_f_score, 2)
+
+
+def save_to_database(refsets, testsets, classifier_name):
+
+    pos_count, neg_count, neu_count = len(refsets['pos']), len(refsets['neg']), len(refsets['neu'])
+    pos_precision, pos_recall, pos_f_score = sub_score_calculator('pos', refsets, testsets)
+    neg_precision, neg_recall, neg_f_score = sub_score_calculator('neg', refsets, testsets)
+    neu_precision, neu_recall, neu_f_score = sub_score_calculator('neu', refsets, testsets)
+
+    overall_precision = overall_score_calculator(pos_precision, neg_precision, neu_precision, pos_count, neg_count, neu_count)
+    overall_recall = overall_score_calculator(pos_recall, neg_recall, neu_recall, pos_count, neg_count, neu_count)
+    overall_f_score = round(2*(overall_precision*overall_recall) / (overall_precision + overall_recall), 2)
+
+    testResult = TestResult(classifier=classifier_name,  pos_count=pos_count, neg_count=neg_count,
+                            pos_precision=pos_precision, pos_recall=pos_recall, pos_f_score=pos_f_score,
+                            neg_precision=neg_precision, neg_recall=neg_recall, neg_f_score=neg_f_score,
+                            neu_precision=neu_precision, neu_recall=neu_recall, neu_f_score=neu_f_score,
+                            precision=overall_precision, recall=overall_recall, f_score=overall_f_score)
+    testResult.save()
 
 
 def save_testing_result(classifier, test_feats, classifier_name):
@@ -129,36 +137,37 @@ def save_testing_result(classifier, test_feats, classifier_name):
         observed = classifier.classify(feats)
         testsets[observed].add(i)
 
-    pos_count, neg_count  = len(refsets['pos']), len(refsets['neg'])
-    pos_precision, pos_recall, pos_f_score = sub_score_calculator('pos', refsets, testsets)
-    neg_precision, neg_recall, neg_f_score = sub_score_calculator('neg', refsets, testsets)
+    save_to_database(refsets, testsets, classifier_name)
 
-    overall_precision = overall_score_calculator(pos_precision, neg_precision, pos_count, neg_count)
-    overall_recall = overall_score_calculator(pos_recall, neg_recall, pos_count, neg_count)
-    overall_f_score = overall_score_calculator(pos_f_score, neg_f_score, pos_count, neg_count)
 
-    # accuracy = (nltk.classify.accuracy(classifier, test_feats)) * 100
+def baseline_method():
+    microblogs = Microblog.objects(microblogType='training')
+    refsets = defaultdict(set)
+    testsets = defaultdict(set)
 
-    testResult = TestResult(classifier=classifier_name,  pos_count=pos_count, neg_count=neg_count,
-                            pos_precision=pos_precision, pos_recall=pos_recall, pos_f_score=pos_f_score,
-                            neg_precision=neg_precision, neg_recall=neg_recall, neg_f_score=neg_f_score,
-                            precision=overall_precision, recall=overall_recall, f_score=overall_f_score)
-    testResult.save()
+    for i, microblog in enumerate(microblogs):
+        refsets[microblog.polarity].add(i)
+        if microblog.negCount < microblog.posCount:
+            testsets['pos'].add(i)
+        elif microblog.negCount > microblog.posCount:
+            testsets['neg'].add(i)
+        else:
+            testsets['neu'].add(i)
+
+    save_to_database(refsets, testsets, 'Baseline')
 
 
 def classify_testing():
 
     test_set = get_feature_set('testing')
-    # random.shuffle(test_set)
-    # test_set = test_set[2000:]
+
+    baseline_method()
+
 
     for (name, input_path) in classifier_path_list:
         with open(input_path, 'rb') as input_classifier:
             classifier = pickle.load(input_classifier)
             save_testing_result(classifier, test_set, name)
-            # classifier.show_most_informative_features(15)
-    # voted_classifier = VoteClassifier(all_classifiers)
-    # save_testing_result(voted_classifier, test_set, 'All in one classifier')
 
 
 def get_classifier(classifier_path):
@@ -260,11 +269,8 @@ def emoticon_retrieve(self, microblog_list):
 class ApiClassifier:
 
     def __init__(self):
-        self.nb_classifier, self.mu_nb_classifier, self.be_nb_classifier = get_classifier(ORIGIN_NB_PATH), get_classifier(MULTINOMIAL_NB_PATH), get_classifier(BERNOULLI_NB_PATH)
-        self.lg_re_classifier, self.perceptron = get_classifier(LOGISTIC_REGRESSION_PATH), get_classifier(PERCEPTRON_PATH)
+        self.nb_classifier, self.mu_nb_classifier, self.lg_re_classifier = get_classifier(ORIGIN_NB_PATH), get_classifier(MULTINOMIAL_NB_PATH), get_classifier(LOGISTIC_REGRESSION_PATH)
         self.li_svc_classifier, self.random_forest_classifier = get_classifier(LINEAR_SVC_PATH), get_classifier(RANDOM_FOREST_PATH)
-        self.vote_classifier = VoteClassifier(self.nb_classifier, self.mu_nb_classifier, self.be_nb_classifier,
-                                              self.lg_re_classifier, self.perceptron, self.li_svc_classifier, self.random_forest_classifier)
         with open(NEGATIVE_WORDS) as negative_words_doc:
             self.negative_words = set([line.rstrip() for line in negative_words_doc])
         with open(POSITIVE_WORDS_PATH) as positive_words_doc:
@@ -273,7 +279,9 @@ class ApiClassifier:
             self.positive_emoticons_dict = set([line.rstrip() for line in positive_emoticons_doc])
         with open(NEGATIVE_EMOTICONS_PATH) as negative_emoticons_doc:
             self.negative_emoticons_dict = set([line.rstrip() for line in negative_emoticons_doc]) 
-            
+
+        self.vote_classifier = VoteClassifier(self.nb_classifier, self.mu_nb_classifier, self.lg_re_classifier, self.li_svc_classifier, self.random_forest_classifier)
+
     def classify(self, microblogs):
         searchResults = []
         words_features = get_words_features_pickle()
@@ -285,9 +293,3 @@ class ApiClassifier:
             searchResults.append(single_searchResult)
 
         return searchResults
-
-# def classify_data_from_api(data):
-#     test_set = None
-#     for microblog in data:
-#         for (name, input_path) in classifier_path_list:
-#             with open(input_path, 'rb') as input_classifier:

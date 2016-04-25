@@ -82,14 +82,14 @@ def add_microblog():
 
 @manager.command
 def complete_microblog():
-    microblogs = Microblog.objects(microblogType='training')
+    microblogs = Microblog.objects(polarity='pos', microblogType='training')
     print(len(microblogs))
-    # new_microblogs = []
-    # for microblog in microblogs:
-    #     newone = Microblog(microblogId=microblog.microblogId, text=microblog.text, polarity=microblog.polarity, negCount=microblog.negCount,
-    #                          posCount=microblog.posCount, words=microblog.words, taggings=microblog.taggings, microblogType=microblog.microblogType, topic='', sentiment='')
-    #     new_microblogs.append(newone)
-    # Microblog.objects.insert(new_microblogs)
+    new_microblogs = []
+    for microblog in microblogs:
+        newone = Microblog(microblogId=microblog.microblogId, text=microblog.text, polarity=microblog.polarity, negCount=microblog.negCount,
+                             posCount=microblog.posCount, words=microblog.words, taggings=microblog.taggings, microblogType=microblog.microblogType, topic='', sentiment='')
+        new_microblogs.append(newone)
+    Microblog.objects.insert(new_microblogs)
 
 
 @manager.command
@@ -149,6 +149,9 @@ def test_search_api():
     microblogs = get_microblogs_by_keywords('邓紫棋')
     print(microblogs)
 
+@manager.command
+def add_neutral():
+    get_and_write_neutral_data()
 
 if __name__ == '__main__':
     manager.run()

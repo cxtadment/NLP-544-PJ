@@ -42,3 +42,15 @@
     text-decoration: none;
     color : darkgreen;
 }
+
+.polarity {
+    display:inline-block !important;
+}
+
+.item-text4 {
+    display:inline;
+}
+
+.paper {
+    display: inline;
+}

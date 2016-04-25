@@ -24,7 +24,6 @@ $( document ).ready(function() {
             microblogs = data.result;
             all_html = ''
             $.each(microblogs, function(k, v){
-                console.log(v)
                 text = v.text
                 filter_text = v.filter_text
                 confidence = v.confidence
@@ -38,36 +37,33 @@ $( document ).ready(function() {
         });
     }
 
-    //<div class="list-group result-display">
-    //  <a href="#" class="list-group-item list-display">
-    //    <div>Microblog Content:</div>
-    //    <div>Polarity: </div>
-    //    <div>Confidence: </div>
-    //    <div>Keywords: </div>
-    //  </a>
-    //</div>
+
     function constructHtml(text, filter_text, confidence, keywords, polarity) {
-        keywordsHtml = '<span class="keywords">'
-        $.each(keywords, function(k, v){
-            keywordsHtml += v + ', '
-        });
-        polarityHtml = ''
-        if (polarity == 'pos') {
-            polarityHtml += '<a href="#" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-thumbs-up"></span> Positive</a>'
-        } else if (polarity == 'neg') {
-            polarityHtml += '<a href="#" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-thumbs-down"></span> Negative</a>'
+        contentHtml = ''
+        if (filter_text && filter_text.length > 0) {
+            keywordsHtml = '<span class="keywords">'
+            $.each(keywords, function(k, v){
+                keywordsHtml += v + ', '
+            });
+            polarityHtml = ''
+            if (polarity == 'pos') {
+                polarityHtml += '<span class="btn btn-success btn-sm item-text4"><span class="glyphicon glyphicon-thumbs-up"></span> Positive</span>'
+            } else if (polarity == 'neg') {
+                polarityHtml += '<span class="btn btn-danger btn-sm item-text4"><span class="glyphicon glyphicon-thumbs-down"></span> Negative</span>'
+            } else if (polarity == 'neu') {
+                polarityHtml += '<span class="btn btn-info btn-sm item-text4"><span class="glyphicon glyphicon-resize-horizontal"></span> Neutral</span>'
+            }
+            keywordsHtml += '</span>'
+            contentHtml = '<div class="list-group result-display"><a href="#" class="list-group-item list-display">'
+            contentHtml += '<div class="item">Microblog Raw Text: <span class="item-text1">'+text+'</span></div>'
+            contentHtml += '<div class="item">Microblog Text After filter: <span class="item-text2">'+filter_text+'</span></div>'
+            contentHtml += '<div class="item polarity"><span>Polarity: </span>'+polarityHtml+'</div>'
+            contentHtml += '<div class="item">Confidence <span class="item-text3">:'+confidence+'%</span></div>'
+            contentHtml += '<div class="item">Keywords:'+keywordsHtml+'</div>'
+            contentHtml += '</a></div>'
         }
-        keywordsHtml += '</span>'
-        contentHtml = '<div class="list-group result-display"><a href="#" class="list-group-item list-display">'
-        contentHtml += '<div class="item">Microblog Origin Text: <span class="item-text1">'+text+'</span></div>'
-        contentHtml += '<div class="item">Microblog Text After filter: <span class="item-text2">'+filter_text+'</span></div>'
-        contentHtml += '<div class="item">Polarity: '+polarityHtml+'</div>'
-        contentHtml += '<div class="item">Confidence <span class="item-text3">:'+confidence+'%</span></div>'
-        contentHtml += '<div class="item">Keywords:'+keywordsHtml+'</div>'
-        contentHtml += '</a></div>'
 
         return contentHtml
-
     }
 
 });

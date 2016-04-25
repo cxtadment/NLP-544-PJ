@@ -14,14 +14,15 @@
                   <th>Overall Fscore</th>
                   <th>Overall Precision</th>
                   <th>Overall recall</th>
-                  <th>Pos Count</th>
-                  <th>Neg Count</th>
                   <th>Pos FScore</th>
                   <th>Pos Precision</th>
                   <th>Pos Recall</th>
                   <th>Neg FScore</th>
                   <th>Neg Precision</th>
                   <th>Neg Recall</th>
+                  <th>Neu FScore</th>
+                  <th>Neu Precision</th>
+                  <th>Neu Recall</th>
               </tr>
               </thead>
               <tbody>
@@ -31,14 +32,15 @@
                   <td>{{ result.f_score }}</td>
                   <td>{{ result.precision }}</td>
                   <td>{{ result.recall }}</td>
-                  <td>{{ result.pos_count }}</td>
-                  <td>{{ result.neg_count }}</td>
                   <td>{{ result.pos_f_score }}</td>
                   <td>{{ result.pos_precision }}</td>
                   <td>{{ result.pos_recall }}</td>
                   <td>{{ result.neg_f_score }}</td>
                   <td>{{ result.neg_precision }}</td>
                   <td>{{ result.neg_recall }}</td>
+                  <td>{{ result.neu_f_score }}</td>
+                  <td>{{ result.neu_precision }}</td>
+                  <td>{{ result.neu_recall }}</td>
               </tr>
               {% endfor %}
 
@@ -53,8 +55,10 @@
             <h1>Our Approach</h1>
             <div>
                 <div class="page-header">
-                    <div><h4>Dataset : Collect microblogs with SinaApi</h4></div>
-                    <div><h4>Annotation: Categorize each microblog's polarity with Hashtag (xxx positive, xxx negative)</h4></div>
+                    <div><h4>Dataset : From SIGHAN-8, including 4905 training microblogs, and 19469 testing microblogs</h4></div>
+                    <div><h4>Annotation: The dataset has been annotated with polarity by SIGHAN-8</h4></div>
+                    <div></div>
+                    <div><h4>Baseline Model: Our baseline model is based on a sentiment words dictionary(NTUSD).</h4></div>
 
                 </div>
                 <div class="page-header">
