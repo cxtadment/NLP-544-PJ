@@ -242,7 +242,7 @@ def emoticon_retrieve(self, microblog_list):
 
     for microblog in microblog_list:
         text_list = microblog[1]
-        emoticons = re.findall(u"\[[\w\u0000-\u9FFF]+\]", content)
+        emoticons = re.findall(u"\[[\w\u0000-\u9FFF]+\]", text_list)
         polarity = microblog[2]
         for emoticon in emoticons:
             if polarity == 'pos' and emoticon in self.positive_emoticons_dict:
@@ -257,7 +257,7 @@ class ApiClassifier:
     def __init__(self):
         self.nb_classifier, self.mu_nb_classifier, self.lg_re_classifier = get_classifier(ORIGIN_NB_PATH), get_classifier(MULTINOMIAL_NB_PATH), get_classifier(LOGISTIC_REGRESSION_PATH)
         self.li_svc_classifier, self.random_forest_classifier = get_classifier(LINEAR_SVC_PATH), get_classifier(RANDOM_FOREST_PATH)
-        with open(NEGATIVE_WORDS) as negative_words_doc:
+        with open(NEGATIVE_WORDS_PATH) as negative_words_doc:
             self.negative_words = set([line.rstrip() for line in negative_words_doc])
         with open(POSITIVE_WORDS_PATH) as positive_words_doc:
             self.positive_words = set([line.rstrip() for line in positive_words_doc]) 
