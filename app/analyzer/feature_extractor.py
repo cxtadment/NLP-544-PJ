@@ -4,7 +4,8 @@ import os
 import jieba.posseg as pseg
 import re
 import operator
-import Queue as queue
+from nltk.tag.stanford import StanfordPOSTagger
+from nltk.tokenize.stanford_segmenter import StanfordSegmenter
 
 CURRENT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/resources/'
 INPUT_POS_PATH = CURRENT_DIR_PATH + 'sentiment_zh/combinePositive.txt'
@@ -12,7 +13,12 @@ INPUT_NEG_PATH = CURRENT_DIR_PATH + 'sentiment_zh/combineNegative.txt'
 INPUT_NEG_ADV_PATH = CURRENT_DIR_PATH + 'sentiment_zh/neg_adv.txt'
 STOPWORDS_PATH = CURRENT_DIR_PATH + 'segment_filter/chinese_stopwords.txt'
 TOPICS_PATH = CURRENT_DIR_PATH + 'segment_filter/topics.txt'
-
+CHINESE_TAGGER_PATH = '/Users/sx/Desktop/CSCI544/FinalProject/code/nltk_stanford/stanford-postagger-full-2015-12-09/models/chinese-distsim.tagger'
+POSTAGGER_JAR_PATH = '/Users/sx/Desktop/CSCI544/FinalProject/code/nltk_stanford/stanford-postagger-full-2015-12-09/stanford-postagger.jar' 
+SEGMENTER_JAR_PATH = '/Users/sx/Desktop/CSCI544/FinalProject/code/nltk_stanford/stanford-segmenter-2015-12-09/stanford-segmenter-3.6.0.jar' 
+SLF4J_PATH = '/Users/sx/Desktop/CSCI544/FinalProject/code/nltk_stanford/stanford-segmenter-2015-12-09/slf4j-api.jar'
+SIHAN_COPORA_DICT_PATH = '/Users/sx/Desktop/CSCI544/FinalProject/code/nltk_stanford/stanford-segmenter-2015-12-09/data'
+MODEL_PATH = '/Users/sx/Desktop/CSCI544/FinalProject/code/nltk_stanford/stanford-segmenter-2015-12-09/data/dict-chris6.ser.gz'
 
 ESCAPE_WORDS = ['不']
 
@@ -33,6 +39,8 @@ class FeatureExtractor:
                 segment_list=list(jieba.cut(line.rstrip()))
                 for segment in segment_list:
                     self.topics.add(segment)
+        self.stanfordpostagger = StanfordPOSTagger(CHINESE_TAGGER_PATH, POSTAGGER_JAR_PATH) 
+        self.segmenter = StanfordSegmenter(path_to_jar = SEGMENTER_JAR_PATH, path_to_slf4j = SLF4J_PATH, path_to_sihan_corpora_dict = SIHAN_COPORA_DICT_PATH, path_to_model = MODEL_PATH, path_to_dict = SIHAN_COPORA_DICT_PATH)           
                             
 
     """
@@ -58,6 +66,27 @@ class FeatureExtractor:
                 negCount += 1
 
         return posCount, negCount
+
+    """
+
+    use stanford segmenter to segment sentence and NTUSD to do the baseline count
+
+    """
+    def polarity_count_stanford(self, microblog_text):
+        seg_list = segmenter.segment(sentence).split()
+        t = 0
+        while t < len(seg_list) - 1:
+            if seg_list[t] in self.escapeNegAdv:
+                seg_list[t + 1] = seg_list[t] + seg_list[t + 1]
+                seg_list.pop(t)
+            t += 1 
+
+        for word in seg_list:
+            if word in self.posDic:
+                posCount += 1
+            if word in self.negDic:
+                negCount += 1
+        return posCount, negCount    
 
     """
 
@@ -94,3 +123,26 @@ class FeatureExtractor:
                 taggings.append(tagging)
         words.extend(extra_features)
         return words, taggings
+
+    """
+
+    use stanford segmenter and postagger to do pos tagging
+
+    """
+
+    def pos_tagging_stanford(self, microblog_text):
+        segment_result = segmenter.segment(microblog_text)
+        postag_result = stanfordpostagger.tag(segment_result.split())
+        words, taggings, extra_features = [], [], []
+        for word_tag_tuple in postag_result:
+            word_tag = word_tag_tuple[1]
+            word_tag_list = word_tag.split('#')
+            word = word_tag_list[0]
+            tagging = word_tag_list[1]
+            if self.seg_filter(word, tagging): 
+                if word in self.escapeNegAdv:
+                    extra_features.append('_negAdv')
+                words.append(word)
+                taggings.append(tagging)
+        words.extend(extra_features)
+        return words, taggings    
