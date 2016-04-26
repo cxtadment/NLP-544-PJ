@@ -149,9 +149,6 @@ def test_search_api():
     microblogs = get_microblogs_by_keywords('邓紫棋')
     print(microblogs)
 
-@manager.command
-def add_neutral():
-    get_and_write_neutral_data()
 
 if __name__ == '__main__':
     manager.run()
