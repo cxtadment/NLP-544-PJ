@@ -200,7 +200,7 @@ def pattern_induct(self, microblog_list):
                 first_word = word_list[i-2]
                 second_word = word_list[i-1]
                 
-                if first_tag == 'AD' and second_tag == 'VA' and cur_tag == 'SP':
+                if first_tag == 'ad' and second_tag == 'a' and cur_tag == 'u':
                     if cur_word in pattern_dict:
                         pattern_dict[cur_word] = pattern_dict[cur_word] + 1
                     else:

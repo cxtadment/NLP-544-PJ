@@ -14,12 +14,12 @@ INPUT_NEG_ADV_PATH = CURRENT_DIR_PATH + 'sentiment_zh/neg_adv.txt'
 STOPWORDS_PATH = CURRENT_DIR_PATH + 'segment_filter/chinese_stopwords.txt'
 TOPICS_PATH = CURRENT_DIR_PATH + 'segment_filter/topics.txt'
 
-CHINESE_TAGGER_PATH = CURRENT_DIR_PATH + 'stanford/postagger/models/chinese-distsim.tagger'
-POSTAGGER_JAR_PATH = CURRENT_DIR_PATH + 'stanford/postagger/stanford-postagger.jar'
-SEGMENTER_JAR_PATH = CURRENT_DIR_PATH + 'stanford/segmenter/stanford-segmenter-3.6.0.jar'
-SLF4J_PATH = CURRENT_DIR_PATH + 'stanford/segmenter/slf4j-api.jar'
-SIHAN_COPORA_DICT_PATH = CURRENT_DIR_PATH + 'stanford/segmenter/data'
-MODEL_PATH = CURRENT_DIR_PATH + 'stanford/segmenter/data/dict-chris6.ser.gz'
+CHINESE_TAGGER_PATH = CURRENT_DIR_PATH + 'stanford/stanford-postagger-full-2015-12-09/models/chinese-distsim.tagger'
+POSTAGGER_JAR_PATH = CURRENT_DIR_PATH + 'stanford/stanford-postagger-full-2015-12-09/stanford-postagger.jar'
+SEGMENTER_JAR_PATH = CURRENT_DIR_PATH + 'stanford/stanford-segmenter-2015-12-09/stanford-segmenter-3.6.0.jar'
+SLF4J_PATH = CURRENT_DIR_PATH + 'stanford/stanford-segmenter-2015-12-09/slf4j-api.jar'
+SIHAN_COPORA_DICT_PATH = CURRENT_DIR_PATH + 'stanford/stanford-segmenter-2015-12-09/data'
+MODEL_PATH = CURRENT_DIR_PATH + 'stanford/stanford-segmenter-2015-12-09/data/dict-chris6.ser.gz'
 
 ESCAPE_WORDS = ['不']
 
@@ -41,7 +41,7 @@ class FeatureExtractor:
                 for segment in segment_list:
                     self.topics.add(segment)
         self.stanfordpostagger = StanfordPOSTagger(CHINESE_TAGGER_PATH, POSTAGGER_JAR_PATH) 
-        self.segmenter = StanfordSegmenter(path_to_jar=SEGMENTER_JAR_PATH, path_to_slf4j=SLF4J_PATH, path_to_sihan_corpora_dict=SIHAN_COPORA_DICT_PATH, path_to_model=MODEL_PATH, path_to_dict=SIHAN_COPORA_DICT_PATH)
+        self.segmenter = StanfordSegmenter(path_to_jar="/Users/sx/Desktop/CSCI544/FinalProject/code/nltk_stanford/stanford-segmenter-2015-12-09/stanford-segmenter-3.6.0.jar", path_to_slf4j = "/Users/sx/Desktop/CSCI544/FinalProject/code/nltk_stanford/stanford-segmenter-2015-12-09/slf4j-api.jar", path_to_sihan_corpora_dict="/Users/sx/Desktop/CSCI544/FinalProject/code/nltk_stanford/stanford-segmenter-2015-12-09/data", path_to_model="/Users/sx/Desktop/CSCI544/FinalProject/code/nltk_stanford/stanford-segmenter-2015-12-09/data/pku.gz", path_to_dict="/Users/sx/Desktop/CSCI544/FinalProject/code/nltk_stanford/stanford-segmenter-2015-12-09/data/dict-chris6.ser.gz")
 
 
     """
