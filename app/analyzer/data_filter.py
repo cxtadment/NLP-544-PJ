@@ -103,13 +103,13 @@ class DataFilter:
     def read_and_filter_api_microblog_data_polarity(self, input_path, polarity):
         polarity_results = []
         with open(input_path) as microblogs_file:
-            pos_results, neg_results = [], []
             weibo_id = 1
             for text in microblogs_file:
                 cur_list = []
-                text = text.rstrip()
-                text = self.text_filters(text)
+                raw_text = text.rstrip()
+                text = self.text_filters(raw_text)
                 cur_list.append(str(weibo_id))
+                cur_list.append(raw_text)
                 cur_list.append(text)
                 cur_list.append(polarity)
                 polarity_results.append(cur_list)
