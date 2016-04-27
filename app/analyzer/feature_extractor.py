@@ -14,13 +14,6 @@ INPUT_NEG_ADV_PATH = CURRENT_DIR_PATH + 'sentiment_zh/neg_adv.txt'
 STOPWORDS_PATH = CURRENT_DIR_PATH + 'segment_filter/chinese_stopwords.txt'
 TOPICS_PATH = CURRENT_DIR_PATH + 'segment_filter/topics.txt'
 
-CHINESE_TAGGER_PATH = CURRENT_DIR_PATH + 'stanford/postagger/models/chinese-distsim.tagger'
-POSTAGGER_JAR_PATH = CURRENT_DIR_PATH + 'stanford/postagger/stanford-postagger.jar'
-SEGMENTER_JAR_PATH = CURRENT_DIR_PATH + 'stanford/segmenter/stanford-segmenter-3.6.0.jar'
-SLF4J_PATH = CURRENT_DIR_PATH + 'stanford/segmenter/slf4j-api.jar'
-SIHAN_COPORA_DICT_PATH = CURRENT_DIR_PATH + 'stanford/segmenter/data'
-MODEL_PATH = CURRENT_DIR_PATH + 'stanford/segmenter/data/pku.gz'
-DICT_PATH = CURRENT_DIR_PATH + 'stanford/segmenter/data/dict-chris6.ser.gz'
 
 ESCAPE_WORDS = ['不']
 
@@ -41,10 +34,6 @@ class FeatureExtractor:
                 segment_list=list(jieba.cut(line.rstrip()))
                 for segment in segment_list:
                     self.topics.add(segment)
-        self.stanfordpostagger = StanfordPOSTagger(CHINESE_TAGGER_PATH, POSTAGGER_JAR_PATH) 
-
-        self.segmenter = StanfordSegmenter(path_to_jar=SEGMENTER_JAR_PATH, path_to_slf4j=SLF4J_PATH, path_to_sihan_corpora_dict=SIHAN_COPORA_DICT_PATH, path_to_model=MODEL_PATH, path_to_dict=DICT_PATH)
-
 
     """
 

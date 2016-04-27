@@ -115,8 +115,6 @@ def print_microblog():
 @manager.command
 def test_classifier():
     module_build()
-    classhandler = ApiClassifier()
-    classhandler.pattern_induct()
     TestResult.objects.delete()
     classify_testing()
 

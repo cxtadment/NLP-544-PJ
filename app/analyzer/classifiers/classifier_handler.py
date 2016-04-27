@@ -26,16 +26,70 @@ LOGISTIC_REGRESSION_PATH = CURRENT_DIR_PATH + 'logisticRegression.pickle'
 PERCEPTRON_PATH = CURRENT_DIR_PATH + 'perceptron.pickle'
 LINEAR_SVC_PATH = CURRENT_DIR_PATH + 'linearSVC.pickle'
 RANDOM_FOREST_PATH = CURRENT_DIR_PATH + 'random_forest.pickle'
+
+
 NEGATIVE_WORDS_PATH = RESOURCES_PATH + 'sentiment_zh/combineNegative.txt'
 POSITIVE_WORDS_PATH = RESOURCES_PATH + 'sentiment_zh/combinePositive.txt'
 POSITIVE_EMOTICONS_PATH = RESOURCES_PATH + 'emotion/positive_emoticons.txt'
 NEGATIVE_EMOTICONS_PATH = RESOURCES_PATH + 'emotion/negative_emoticons.txt'
+
+POSITIVE_PATTERN_PATH = CURRENT_DIR_PATH + 'posPattern.pickle'
+NEGATIVE_PATTERN_PATH = CURRENT_DIR_PATH + 'negPattern.pickle'
 
 classifier_path_list = [('Naive Bayes', ORIGIN_NB_PATH), ('Multinomial Naive Bayes', MULTINOMIAL_NB_PATH),
                         ('Logistic Regression', LOGISTIC_REGRESSION_PATH), ('Linear SVC', LINEAR_SVC_PATH),
                         ('Random Forest', RANDOM_FOREST_PATH)]
 
 TAGGING_CHOOSE = set(['nr', 'n', 'ul'])
+
+
+def pickle_patterns(polarity_pattern_dict, polarity):
+    sorted_pattern_tuple = sorted(polarity_pattern_dict[polarity].items(), key=operator.itemgetter(1), reverse=True)
+    sorted_pattern_dict = {}
+    for (key, value) in sorted_pattern_tuple[:100]:
+        sorted_pattern_dict[key] = value
+    print(sorted_pattern_dict)
+    pickle_path = POSITIVE_PATTERN_PATH if polarity == 'pos' else NEGATIVE_PATTERN_PATH
+    with open(pickle_path, 'wb') as output_file:
+        pickle.dump(sorted_pattern_dict, output_file)
+
+
+def pattern_induct(microblogs):
+
+    with open(NEGATIVE_WORDS_PATH) as negative_words_doc:
+        negative_words = set([line.rstrip() for line in negative_words_doc])
+    with open(POSITIVE_WORDS_PATH) as positive_words_doc:
+        positive_words = set([line.rstrip() for line in positive_words_doc])
+
+    polarity_pattern_dict = defaultdict(defaultdict)
+    for microblog in microblogs:
+        polarity = microblog.polarity
+        if polarity == 'neu':
+            continue
+        pattern_dict = polarity_pattern_dict[polarity]
+        word_list, tag_list = microblog.raw_words, microblog.raw_taggings
+        tag_list = microblog.raw_taggings
+        for i in range(0, len(tag_list)):
+            cur_word = word_list[i]
+            if i >= 2:
+                cur_tag, first_tag, second_tag = tag_list[i], tag_list[i - 1], tag_list[i - 2]
+                first_word, second_word = word_list[i - 2], word_list[i - 1]
+                pattern = first_word + second_word + cur_word
+                if first_tag == 'ad' and second_tag.startswith('a') and cur_tag.startswith('u'):
+                    if pattern in pattern_dict:
+                        pattern_dict[pattern] = pattern_dict[pattern] + 1
+                    else:
+                        pattern_dict[pattern] = 1
+                    continue
+            if cur_word in positive_words and polarity == 'pos' or (
+                    cur_word in negative_words and polarity == 'neg'):
+                if cur_word in pattern_dict:
+                    pattern_dict[cur_word] = pattern_dict[cur_word] + 1
+                else:
+                    pattern_dict[cur_word] = 1
+        polarity_pattern_dict[polarity] = pattern_dict
+    pickle_patterns(polarity_pattern_dict, 'pos')
+    pickle_patterns(polarity_pattern_dict, 'neg')
 
 
 def get_words_features_pickle():
@@ -45,6 +99,9 @@ def get_words_features_pickle():
 
 def pickle_words_features(microblogType):
     microblogs = Microblog.objects(microblogType=microblogType)
+
+    #pickle pattern
+    pattern_induct(microblogs)
 
     all_words = []
     for microblog in microblogs:
@@ -207,63 +264,6 @@ class ApiClassifier:
 
         return searchResults
 
-    """
-
-    retrieve pattern
-
-    """
-
-    def pattern_induct(self):
-        microblogs = Microblog.objects()
-        polarity_pattern_dict = {}
-        polarity_pattern_dict['pos'] = {}
-        polarity_pattern_dict['neg'] = {}
-        for microblog in microblogs:
-            polarity = microblog.polarity
-            if polarity == 'neu':
-                continue
-            pattern_dict = polarity_pattern_dict[polarity]
-            word_list = microblog.pre_words
-            tag_list = microblog.pre_taggings
-            for i in range(0, len(tag_list)):
-                cur_word = word_list[i]
-                if i >= 2:
-                    first_tag = tag_list[i - 2]
-                    second_tag = tag_list[i - 1]
-                    cur_tag = tag_list[i]
-                    first_word = word_list[i - 2]
-                    second_word = word_list[i - 1]
-                    pattern = first_word + second_word + cur_word
-                    if first_tag == 'ad' and second_tag.startswith('a') and cur_tag.startswith('u'):
-                        print(pattern)
-                        if pattern in pattern_dict:
-                            pattern_dict[pattern] = pattern_dict[pattern] + 1
-                        else:
-                            pattern_dict[pattern] = 1
-                        continue
-                if cur_word in self.positive_words and polarity == 'pos' or (
-                        cur_word in self.negative_words and polarity == 'neg'):
-                    if cur_word in pattern_dict:
-                        pattern_dict[cur_word] = pattern_dict[cur_word] + 1
-                    else:
-                        pattern_dict[cur_word] = 1
-            polarity_pattern_dict[polarity] = pattern_dict
-        # sort polarity_pattern_dict
-        positive_pattern_dict = polarity_pattern_dict['pos']
-        negative_pattern_dict = polarity_pattern_dict['neg']
-        sorted_positive_pattern_tuple = sorted(positive_pattern_dict.items(), key=operator.itemgetter(1))
-        sorted_negative_pattern_tuple = sorted(negative_pattern_dict.items(), key=operator.itemgetter(1))
-        sorted_positive_pattern_dict = {}
-        sorted_negative_pattern_dict = {}
-        for (key, value) in sorted_positive_pattern_tuple[-100:]:
-            sorted_positive_pattern_dict[key] = value
-        for key, value in sorted_negative_pattern_tuple[-100:]:
-            sorted_negative_pattern_dict[key] = value
-        print(sorted_positive_pattern_dict)
-        print('\n')
-        print(sorted_negative_pattern_dict)
-        print('\n')
-        return sorted_positive_pattern_dict, sorted_negative_pattern_dict
 
     """
 

@@ -36,8 +36,8 @@ class Microblog(db.Document):
     taggings = db.ListField(db.StringField())
     words = db.ListField(db.StringField())
     extra_features = db.ListField(db.StringField())
-    pre_words = db.ListField(db.StringField())
-    pre_taggings = db.ListField(db.StringField())
+    raw_words = db.ListField(db.StringField())
+    raw_taggings = db.ListField(db.StringField())
 
     def __str__(self):
         return "microblogId: %s, text: %s, polarity: %s, microblogType: %s, topic: %s, sentiment: %s" % (self.microblogId, self.text, self.polarity, self.microblogType, self.topic, self.sentiment)
