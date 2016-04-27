@@ -76,12 +76,13 @@ def microblog_data_handler(microblog_type):
 
             #feature extractor
             microblogId, microblog_text, polarity = microblog[0], microblog[1], microblog[2]
-            # posCount, negCount = feature_extractor.polarity_count(microblog_text)
-            # words, taggings = feature_extractor.pos_tagging(microblog_text)
-
-            new_words, new_taggings = feature_extractor.pos_tagging_stanford(microblog_text)
+            posCount, negCount = feature_extractor.polarity_count(microblog_text)
+            pre_words, pre_taggings, words, taggings = feature_extractor.pos_tagging(microblog_text)
+            if not pre_words or not words:
+                continue
+            # new_words, new_taggings = feature_extractor.pos_tagging_stanford(microblog_text)
             single_microblog = Microblog(microblogId=microblogId, text=microblog_text, polarity=polarity, microblogType=microblog_type, topic='',
-                                         sentiment='', new_words=new_words, new_taggings=new_taggings)
+                                         sentiment='', words=words, taggings=taggings, pre_words=pre_words, pre_taggings=pre_taggings, posCount=posCount, negCount=negCount)
             result.append(single_microblog)
 
     return result
