@@ -83,6 +83,7 @@ def microblog_data_handler(microblog_type):
             single_microblog = Microblog(microblogId=microblogId, text=microblog_text, polarity=polarity, microblogType=microblog_type, topic='',
                                          posCount=posCount, negCount=negCount, words=words, taggings=taggings,
                                          raw_words=raw_words, raw_taggings=raw_taggings, sentiment='')
+
             result.append(single_microblog)
 
     return result
