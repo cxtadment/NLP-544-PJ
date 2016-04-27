@@ -107,17 +107,14 @@ class FeatureExtractor:
         words_taggings = pseg.cut(microblog_text)
 
         words, taggings, extra_features = [], [], []
-        pre_words, pre_taggings = [], []
         for word, tagging in words_taggings:
-            pre_words.append(word)
-            pre_taggings.append(tagging)
             if self.seg_filter(word, tagging):
                 if word in self.escapeNegAdv:
                     extra_features.append('_negAdv')
                 words.append(word)
                 taggings.append(tagging)
         words.extend(extra_features)
-        return pre_words, pre_taggings, words, taggings
+        return words, taggings
 
     """
 
