@@ -233,12 +233,13 @@ class ApiClassifier:
                     cur_tag = tag_list[i]
                     first_word = word_list[i - 2]
                     second_word = word_list[i - 1]
-
-                    if first_tag == 'ad' and second_tag == 'a' and cur_tag == 'u':
-                        if cur_word in pattern_dict:
-                            pattern_dict[cur_word] = pattern_dict[cur_word] + 1
+                    pattern = first_word + second_word + cur_word
+                    if first_tag == 'ad' and second_tag.startswith('a') and cur_tag.startswith('u'):
+                        if pattern in pattern_dict:
+                            pattern_dict[pattern] = pattern_dict[pattern] + 1
                         else:
-                            pattern_dict[cur_word] = 1
+                            pattern_dict[pattern] = 1
+                        continue
                 if cur_word in self.positive_words and polarity == 'pos' or (
                         cur_word in self.negative_words and polarity == 'neg'):
                     if cur_word in pattern_dict:
@@ -257,10 +258,6 @@ class ApiClassifier:
             sorted_positive_pattern_dict[key] = value
         for key, value in sorted_negative_pattern_tuple[:100]:
             sorted_negative_pattern_dict[key] = value
-        print('sorted_positive_pattern_dict---------------------')
-        print(sorted_positive_pattern_dict)
-        print('sorted_negative_pattern_dict---------------------')
-        print(sorted_negative_pattern_dict)
         return sorted_positive_pattern_dict, sorted_negative_pattern_dict
 
     """
