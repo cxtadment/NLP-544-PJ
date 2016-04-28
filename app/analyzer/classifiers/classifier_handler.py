@@ -107,7 +107,7 @@ def pickle_words_features(microblogType):
         all_words.extend(microblog.words)
     all_words = nltk.FreqDist(all_words)
 
-    words_features = list(all_words.keys())[:1500]
+    words_features = list(all_words.keys())[:3000]
 
     with open(WORDS_FEATURES_PATH, 'wb') as output_file:
         pickle.dump(words_features, output_file)
@@ -124,7 +124,7 @@ def feature_filter(document, words_features):
 
 def get_feature_set(microblogType):
 
-    microblogs = Microblog.objects(microblogType=microblogType)
+    microblogs = Microblog.objects()
 
     words_features = get_words_features_pickle()
 
