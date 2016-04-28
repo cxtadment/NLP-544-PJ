@@ -46,9 +46,8 @@ TAGGING_CHOOSE = set(['nr', 'n', 'ul'])
 def pickle_patterns(polarity_pattern_dict, polarity):
     sorted_pattern_tuple = sorted(polarity_pattern_dict[polarity].items(), key=operator.itemgetter(1), reverse=True)
     sorted_pattern_dict = {}
-    for (key, value) in sorted_pattern_tuple[:100]:
+    for (key, value) in sorted_pattern_tuple[:200]:
         sorted_pattern_dict[key] = value
-    print(sorted_pattern_dict)
     pickle_path = POSITIVE_PATTERN_PATH if polarity == 'pos' else NEGATIVE_PATTERN_PATH
     with open(pickle_path, 'wb') as output_file:
         pickle.dump(sorted_pattern_dict, output_file)
@@ -74,12 +73,11 @@ def pattern_induct(microblogs):
             if i >= 2:
                 cur_tag, first_tag, second_tag = tag_list[i], tag_list[i - 1], tag_list[i - 2]
                 first_word, second_word = word_list[i - 2], word_list[i - 1]
-                pattern = first_word + second_word + cur_word
                 if first_tag == 'ad' and second_tag.startswith('a') and cur_tag.startswith('u'):
-                    if pattern in pattern_dict:
-                        pattern_dict[pattern] = pattern_dict[pattern] + 1
+                    if cur_tag in pattern_dict:
+                        pattern_dict[cur_tag] = pattern_dict[cur_tag] + 1
                     else:
-                        pattern_dict[pattern] = 1
+                        pattern_dict[cur_tag] = 1
                     continue
             if cur_word in positive_words and polarity == 'pos' or (
                     cur_word in negative_words and polarity == 'neg'):
@@ -98,7 +96,8 @@ def get_words_features_pickle():
 
 
 def pickle_words_features(microblogType):
-    microblogs = Microblog.objects(microblogType=microblogType)
+
+    microblogs = Microblog.objects()
 
     #pickle pattern
     pattern_induct(microblogs)
@@ -108,7 +107,7 @@ def pickle_words_features(microblogType):
         all_words.extend(microblog.words)
     all_words = nltk.FreqDist(all_words)
 
-    words_features = list(all_words.keys())[:3000]
+    words_features = list(all_words.keys())[:1500]
 
     with open(WORDS_FEATURES_PATH, 'wb') as output_file:
         pickle.dump(words_features, output_file)
@@ -125,7 +124,7 @@ def feature_filter(document, words_features):
 
 def get_feature_set(microblogType):
 
-    microblogs = Microblog.objects()
+    microblogs = Microblog.objects(microblogType=microblogType)
 
     words_features = get_words_features_pickle()
 
@@ -142,11 +141,9 @@ def module_build():
     #naive bayes classifiers
     origin_nb_classifier(train_set, ORIGIN_NB_PATH)
     multinomial_nb_classifer(train_set, MULTINOMIAL_NB_PATH)
-    # bernoulli_nb_classifer(train_set, BERNOULLI_NB_PATH)
 
     #linear classifiers
     logistic_regression_classifier(train_set, LOGISTIC_REGRESSION_PATH)
-    # perceptron_classifier(train_set, PERCEPTRON_PATH)
 
     #svm classifiers
     linearSVC_classifier(train_set, LINEAR_SVC_PATH)
@@ -199,8 +196,8 @@ def save_testing_result(classifier, test_feats, classifier_name):
     save_to_database(refsets, testsets, classifier_name)
 
 
-def baseline_method():
-    microblogs = Microblog.objects(microblogType='training')
+def baseline_method(microblogs):
+
     refsets = defaultdict(set)
     testsets = defaultdict(set)
 
@@ -215,13 +212,59 @@ def baseline_method():
 
     save_to_database(refsets, testsets, 'Baseline')
 
+def get_latent_feature_pickle():
+
+    with open(POSITIVE_PATTERN_PATH, 'rb') as input_file:
+        positive_pattern_dict = pickle.load(input_file)
+    with open(NEGATIVE_PATTERN_PATH, 'rb') as input_file:
+        negative_pattern_dict = pickle.load(input_file)
+
+    return positive_pattern_dict, negative_pattern_dict
+
+
+def latent_polarity_method(microblogs):
+
+    positive_pattern_dict, negative_pattern_dict = get_latent_feature_pickle()
+
+    refsets = defaultdict(set)
+    testsets = defaultdict(set)
+
+    for i, microblog in enumerate(microblogs):
+        raw_taggings, raw_words = microblog.raw_taggings, microblog.raw_words
+        posCount, negCount = 0, 0
+        for t in range(0, len(raw_taggings)):
+            cur_word = raw_words[t]
+            if t >= 2:
+                cur_tag, first_tag, second_tag = raw_taggings[t], raw_taggings[t - 1], raw_taggings[t - 2]
+                if first_tag == 'ad' and second_tag.startswith('a') and cur_tag.startswith('u'):
+                    if cur_word in positive_pattern_dict:
+                        posCount += 1
+                    if cur_word in negative_pattern_dict:
+                        negCount += 1
+                    continue
+            if cur_word in positive_pattern_dict:
+                posCount += 1
+            if cur_word in negative_pattern_dict:
+                negCount += 1
+        refsets[microblog.polarity].add(i)
+        if negCount < posCount:
+            testsets['pos'].add(i)
+        elif negCount > posCount:
+            testsets['neg'].add(i)
+        else:
+            testsets['neu'].add(i)
+
+    save_to_database(refsets, testsets, 'Latent Polarity Method')
+
+
 
 def classify_testing():
 
+    microblogs = Microblog.objects(microblogType='testing')
+    baseline_method(microblogs)
+    latent_polarity_method(microblogs)
+
     test_set = get_feature_set('testing')
-
-    baseline_method()
-
 
     for (name, input_path) in classifier_path_list:
         with open(input_path, 'rb') as input_classifier:
@@ -233,7 +276,6 @@ def get_classifier(classifier_path):
     with open(classifier_path, 'rb') as input_classifier:
         classifier = pickle.load(input_classifier)
         return classifier
-
 
 
 class ApiClassifier:
