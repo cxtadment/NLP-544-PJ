@@ -48,7 +48,6 @@ def pickle_patterns(polarity_pattern_dict, polarity):
     sorted_pattern_dict = {}
     for (key, value) in sorted_pattern_tuple[:100]:
         sorted_pattern_dict[key] = value
-    print(sorted_pattern_dict)
     pickle_path = POSITIVE_PATTERN_PATH if polarity == 'pos' else NEGATIVE_PATTERN_PATH
     with open(pickle_path, 'wb') as output_file:
         pickle.dump(sorted_pattern_dict, output_file)
@@ -73,13 +72,12 @@ def pattern_induct(microblogs):
             cur_word = word_list[i]
             if i >= 2:
                 cur_tag, first_tag, second_tag = tag_list[i], tag_list[i - 1], tag_list[i - 2]
-                first_word, second_word = word_list[i - 2], word_list[i - 1]
-                pattern = first_word + second_word + cur_word
                 if first_tag == 'ad' and second_tag.startswith('a') and cur_tag.startswith('u'):
-                    if pattern in pattern_dict:
-                        pattern_dict[pattern] = pattern_dict[pattern] + 1
+                    print(cur_word)
+                    if cur_word in pattern_dict:
+                        pattern_dict[cur_word] = pattern_dict[cur_word] + 1
                     else:
-                        pattern_dict[pattern] = 1
+                        pattern_dict[cur_word] = 1
                     continue
             if cur_word in positive_words and polarity == 'pos' or (
                     cur_word in negative_words and polarity == 'neg'):
@@ -90,6 +88,82 @@ def pattern_induct(microblogs):
         polarity_pattern_dict[polarity] = pattern_dict
     pickle_patterns(polarity_pattern_dict, 'pos')
     pickle_patterns(polarity_pattern_dict, 'neg')
+
+def emoticon_retrieve_training():
+    microblogs = Microblog.objects(microblogType='training')
+    with open(POSITIVE_EMOTICONS_PATH) as positive_emoticons_doc:
+        positive_emoticons_dict = set([line.rstrip() for line in positive_emoticons_doc])
+    with open(NEGATIVE_EMOTICONS_PATH) as negative_emoticons_doc:
+        negative_emoticons_dict = set([line.rstrip() for line in negative_emoticons_doc])
+    positive_emoticon_count_dict = {}
+    negative_emoticon_count_dict = {}
+    # add-one smoothing
+    for positive_emoticon in positive_emoticons_dict:
+        positive_emoticon_count_dict[positive_emoticon] = 1
+    for negative_emoticon in negative_emoticons_dict:
+        negative_emoticon_count_dict[negative_emoticon] = 1
+    for microblog in microblogs:
+        text = microblog.text
+        emoticons = re.findall('\[[\w+]+\]', text)
+        if emoticons:
+            polarity = microblog.polarity
+            for emoticon in emoticons:
+                emo = emoticon[1:-1]
+                if polarity == 'pos' and emo in positive_emoticons_dict:
+                    positive_emoticon_count_dict[emo] = positive_emoticon_count_dict[emo] + 1
+                elif polarity == 'neg' and emo in negative_emoticons_dict:
+                    negative_emoticon_count_dict[emo] = negative_emoticon_count_dict[emo] + 1
+    positive_total, negative_total = sum(positive_emoticon_count_dict.values()), sum(negative_emoticon_count_dict.values())
+    return positive_total, negative_total, positive_emoticon_count_dict, negative_emoticon_count_dict
+
+def emoticon_retrieve_test():
+    positive_total, negative_total, positive_emoticon_count_dict, negative_emoticon_count_dict = emoticon_retrieve_training()
+    microblogs = Microblog.objects(microblogType='testing')
+    with open(POSITIVE_EMOTICONS_PATH) as positive_emoticons_doc:
+        positive_emoticons_dict = set([line.rstrip() for line in positive_emoticons_doc])
+    with open(NEGATIVE_EMOTICONS_PATH) as negative_emoticons_doc:
+        negative_emoticons_dict = set([line.rstrip() for line in negative_emoticons_doc])
+    neu_count_pre, pos_count_pre, neg_count_pre = 0, 0, 0
+    neu_count_rec, pos_count_rec, neg_count_rec = 0, 0, 0
+    neu_count, pos_count, neg_count = 0, 0, 0
+    for microblog in microblogs:
+        polarity = microblog.polarity
+        text = microblog.text
+        emoticons = re.findall('\[[\w+]+\]', text)
+        if emoticons:
+            posCount, negCount = 0, 0
+            for emoticon in emoticons:
+                emo = emoticon[1:-1]
+                if emo in positive_emoticons_dict:
+                    posCount = posCount + positive_emoticon_count_dict[emo]
+                elif emo in negative_emoticons_dict:
+                    negCount = negCount + negative_emoticon_count_dict[emo]
+            probability = posCount/positive_total - negCount/negative_total
+            if probability == 0:
+                neu_count_pre = neu_count_pre + 1
+            elif probability > 0:
+                pos_count_pre = pos_count_pre + 1
+            else:
+                neg_count_pre = neg_count_pre + 1
+            if polarity == 'neu':
+                neu_count_rec = neu_count_rec + 1
+            elif polarity == 'pos':
+                pos_count_rec = pos_count_rec + 1
+            else:
+                neg_count_rec = neg_count_rec + 1
+            if probability == 0 and polarity == 'neu':
+                neu_count = neu_count + 1
+            if probability > 0 and polarity == 'pos':
+                pos_count = pos_count + 1
+            if probability < 0 and polarity == 'neg':
+                neg_count = neg_count + 1
+    print('pos_precision', '%.2f' %(pos_count/pos_count_pre))
+    print('neg_precision', '%.2f' %(neg_count/neg_count_pre))
+    print('neu_precision', '%.2f' %(neu_count/neu_count_pre))
+    print('pos_recall', '%.2f' %(pos_count/pos_count_rec))
+    print('neg_recall', '%.2f' %(neg_count/neg_count_rec))
+    print('neu_recall', '%.2f' %(neu_count/neu_count_rec))
+
 
 
 def get_words_features_pickle():
@@ -138,7 +212,7 @@ def get_feature_set(microblogType):
 def module_build():
     pickle_words_features('training')
     train_set = get_feature_set('training')
-
+    emoticon_retrieve_test()
     #naive bayes classifiers
     origin_nb_classifier(train_set, ORIGIN_NB_PATH)
     multinomial_nb_classifer(train_set, MULTINOMIAL_NB_PATH)
@@ -244,12 +318,7 @@ class ApiClassifier:
         with open(NEGATIVE_WORDS_PATH) as negative_words_doc:
             self.negative_words = set([line.rstrip() for line in negative_words_doc])
         with open(POSITIVE_WORDS_PATH) as positive_words_doc:
-            self.positive_words = set([line.rstrip() for line in positive_words_doc]) 
-        with open(POSITIVE_EMOTICONS_PATH) as positive_emoticons_doc:
-            self.positive_emoticons_dict = set([line.rstrip() for line in positive_emoticons_doc])
-        with open(NEGATIVE_EMOTICONS_PATH) as negative_emoticons_doc:
-            self.negative_emoticons_dict = set([line.rstrip() for line in negative_emoticons_doc]) 
-
+            self.positive_words = set([line.rstrip() for line in positive_words_doc])
         self.vote_classifier = VoteClassifier(self.nb_classifier, self.mu_nb_classifier, self.lg_re_classifier, self.li_svc_classifier, self.random_forest_classifier)
 
     def classify(self, microblogs):
@@ -263,31 +332,3 @@ class ApiClassifier:
             searchResults.append(single_searchResult)
 
         return searchResults
-
-
-    """
-
-    retrieve emoticons
-
-    """
-
-    def emoticon_retrieve(self, microblog_list):
-        positive_emoticon_count_dict = {}
-        negative_emoticon_count_dict = {}
-        # add-one smoothing
-        for positive_emoticon in self.positive_emoticons_dict:
-            positive_emoticon_count_dict[positive_emoticon] = 1
-        for negative_emoticon in self.negative.emoticons_dict:
-            negative_emoticon_count_dict[negative_emoticon] = 1
-
-        for microblog in microblog_list:
-            text_list = microblog[1]
-            emoticons = re.findall(u"\[[\w\u0000-\u9FFF]+\]", text_list)
-            polarity = microblog[2]
-            for emoticon in emoticons:
-                if polarity == 'pos' and emoticon in self.positive_emoticons_dict:
-                    positive_emoticon_count_dict[emoticon] = positive_emoticon_count_dict[emoticon] + 1
-                elif polarity == 'neg' and emoticon in self.negative_emoticons_dict:
-                    negative_emoticon_count_dict[emoticon] = negative_emoticon_count_dict[emoticon] + 1
-
-            return positive_emoticon_count_dict, negative_emoticon_count_dict

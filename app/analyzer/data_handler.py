@@ -79,7 +79,8 @@ def microblog_data_handler(microblog_type):
             posCount, negCount = feature_extractor.polarity_count(microblog_text)
             words, taggings = feature_extractor.pos_tagging(microblog_text)
             raw_words, raw_taggings = feature_extractor.pos_tagging(microblog_raw_text)
-
+            if not words or not taggings:
+                continue
             single_microblog = Microblog(microblogId=microblogId, text=microblog_text, polarity=polarity, microblogType=microblog_type, topic='',
                                          posCount=posCount, negCount=negCount, words=words, taggings=taggings,
                                          raw_words=raw_words, raw_taggings=raw_taggings, sentiment='')
