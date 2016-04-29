@@ -123,6 +123,7 @@ def test_dict():
     thisjson = {"haha": "shabi", "xixi": "caonima"}
     thisdict = TestDict(thisdict=thisjson)
     thisdict.save()
+
 @manager.command
 def test_count():
     feature_extracter = FeatureExtractor()

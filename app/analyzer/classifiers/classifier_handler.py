@@ -46,7 +46,7 @@ TAGGING_CHOOSE = set(['nr', 'n', 'ul'])
 def pickle_patterns(polarity_pattern_dict, polarity):
     sorted_pattern_tuple = sorted(polarity_pattern_dict[polarity].items(), key=operator.itemgetter(1), reverse=True)
     sorted_pattern_dict = {}
-    for (key, value) in sorted_pattern_tuple[:100]:
+    for (key, value) in sorted_pattern_tuple[:200]:
         sorted_pattern_dict[key] = value
     pickle_path = POSITIVE_PATTERN_PATH if polarity == 'pos' else NEGATIVE_PATTERN_PATH
     with open(pickle_path, 'wb') as output_file:
@@ -88,13 +88,15 @@ def pattern_induct(microblogs):
         polarity_pattern_dict[polarity] = pattern_dict
     pickle_patterns(polarity_pattern_dict, 'pos')
     pickle_patterns(polarity_pattern_dict, 'neg')
-
-def emoticon_retrieve_training():
-    microblogs = Microblog.objects(microblogType='training')
+def emoticon_retrieve():
     with open(POSITIVE_EMOTICONS_PATH) as positive_emoticons_doc:
         positive_emoticons_dict = set([line.rstrip() for line in positive_emoticons_doc])
     with open(NEGATIVE_EMOTICONS_PATH) as negative_emoticons_doc:
         negative_emoticons_dict = set([line.rstrip() for line in negative_emoticons_doc])
+    return positive_emoticons_dict, negative_emoticons_dict
+def emoticon_retrieve_training():
+    microblogs = Microblog.objects(microblogType='training')
+    positive_emoticons_dict, negative_emoticons_dict = emoticon_retrieve()
     positive_emoticon_count_dict = {}
     negative_emoticon_count_dict = {}
     # add-one smoothing
@@ -119,13 +121,7 @@ def emoticon_retrieve_training():
 def emoticon_retrieve_test():
     positive_total, negative_total, positive_emoticon_count_dict, negative_emoticon_count_dict = emoticon_retrieve_training()
     microblogs = Microblog.objects(microblogType='testing')
-    with open(POSITIVE_EMOTICONS_PATH) as positive_emoticons_doc:
-        positive_emoticons_dict = set([line.rstrip() for line in positive_emoticons_doc])
-    with open(NEGATIVE_EMOTICONS_PATH) as negative_emoticons_doc:
-        negative_emoticons_dict = set([line.rstrip() for line in negative_emoticons_doc])
-    neu_count_pre, pos_count_pre, neg_count_pre = 0, 0, 0
-    neu_count_rec, pos_count_rec, neg_count_rec = 0, 0, 0
-    neu_count, pos_count, neg_count = 0, 0, 0
+    positive_emoticons_dict, negative_emoticons_dict = emoticon_retrieve()
     for microblog in microblogs:
         polarity = microblog.polarity
         text = microblog.text
@@ -139,32 +135,12 @@ def emoticon_retrieve_test():
                 elif emo in negative_emoticons_dict:
                     negCount = negCount + negative_emoticon_count_dict[emo]
             probability = posCount/positive_total - negCount/negative_total
-            if probability == 0:
-                neu_count_pre = neu_count_pre + 1
-            elif probability > 0:
-                pos_count_pre = pos_count_pre + 1
+            if probability > 0:
+                cur_porlarity = 'pos'
+            elif probability < 0:
+                cur_porlarity = 'neg'
             else:
-                neg_count_pre = neg_count_pre + 1
-            if polarity == 'neu':
-                neu_count_rec = neu_count_rec + 1
-            elif polarity == 'pos':
-                pos_count_rec = pos_count_rec + 1
-            else:
-                neg_count_rec = neg_count_rec + 1
-            if probability == 0 and polarity == 'neu':
-                neu_count = neu_count + 1
-            if probability > 0 and polarity == 'pos':
-                pos_count = pos_count + 1
-            if probability < 0 and polarity == 'neg':
-                neg_count = neg_count + 1
-    print('pos_precision', '%.2f' %(pos_count/pos_count_pre))
-    print('neg_precision', '%.2f' %(neg_count/neg_count_pre))
-    print('neu_precision', '%.2f' %(neu_count/neu_count_pre))
-    print('pos_recall', '%.2f' %(pos_count/pos_count_rec))
-    print('neg_recall', '%.2f' %(neg_count/neg_count_rec))
-    print('neu_recall', '%.2f' %(neu_count/neu_count_rec))
-
-
+                cur_porlarity = 'neu'
 
 def get_words_features_pickle():
     with open(WORDS_FEATURES_PATH, 'rb') as input_file:
@@ -172,7 +148,8 @@ def get_words_features_pickle():
 
 
 def pickle_words_features(microblogType):
-    microblogs = Microblog.objects(microblogType=microblogType)
+
+    microblogs = Microblog.objects()
 
     #pickle pattern
     pattern_induct(microblogs)
@@ -216,11 +193,9 @@ def module_build():
     #naive bayes classifiers
     origin_nb_classifier(train_set, ORIGIN_NB_PATH)
     multinomial_nb_classifer(train_set, MULTINOMIAL_NB_PATH)
-    # bernoulli_nb_classifer(train_set, BERNOULLI_NB_PATH)
 
     #linear classifiers
     logistic_regression_classifier(train_set, LOGISTIC_REGRESSION_PATH)
-    # perceptron_classifier(train_set, PERCEPTRON_PATH)
 
     #svm classifiers
     linearSVC_classifier(train_set, LINEAR_SVC_PATH)
@@ -273,8 +248,8 @@ def save_testing_result(classifier, test_feats, classifier_name):
     save_to_database(refsets, testsets, classifier_name)
 
 
-def baseline_method():
-    microblogs = Microblog.objects(microblogType='training')
+def baseline_method(microblogs):
+
     refsets = defaultdict(set)
     testsets = defaultdict(set)
 
@@ -289,13 +264,59 @@ def baseline_method():
 
     save_to_database(refsets, testsets, 'Baseline')
 
+def get_latent_feature_pickle():
+
+    with open(POSITIVE_PATTERN_PATH, 'rb') as input_file:
+        positive_pattern_dict = pickle.load(input_file)
+    with open(NEGATIVE_PATTERN_PATH, 'rb') as input_file:
+        negative_pattern_dict = pickle.load(input_file)
+
+    return positive_pattern_dict, negative_pattern_dict
+
+
+def latent_polarity_method(microblogs):
+
+    positive_pattern_dict, negative_pattern_dict = get_latent_feature_pickle()
+
+    refsets = defaultdict(set)
+    testsets = defaultdict(set)
+
+    for i, microblog in enumerate(microblogs):
+        raw_taggings, raw_words = microblog.raw_taggings, microblog.raw_words
+        posCount, negCount = 0, 0
+        for t in range(0, len(raw_taggings)):
+            cur_word = raw_words[t]
+            if t >= 2:
+                cur_tag, first_tag, second_tag = raw_taggings[t], raw_taggings[t - 1], raw_taggings[t - 2]
+                if first_tag == 'ad' and second_tag.startswith('a') and cur_tag.startswith('u'):
+                    if cur_word in positive_pattern_dict:
+                        posCount += 1
+                    if cur_word in negative_pattern_dict:
+                        negCount += 1
+                    continue
+            if cur_word in positive_pattern_dict:
+                posCount += 1
+            if cur_word in negative_pattern_dict:
+                negCount += 1
+        refsets[microblog.polarity].add(i)
+        if negCount < posCount:
+            testsets['pos'].add(i)
+        elif negCount > posCount:
+            testsets['neg'].add(i)
+        else:
+            testsets['neu'].add(i)
+
+    save_to_database(refsets, testsets, 'Latent Polarity Method')
+
+
 
 def classify_testing():
 
+    microblogs = Microblog.objects(microblogType='testing')
+    baseline_method(microblogs)
+    latent_polarity_method(microblogs)
+
     test_set = get_feature_set('testing')
-
-    baseline_method()
-
 
     for (name, input_path) in classifier_path_list:
         with open(input_path, 'rb') as input_classifier:
@@ -307,7 +328,6 @@ def get_classifier(classifier_path):
     with open(classifier_path, 'rb') as input_classifier:
         classifier = pickle.load(input_classifier)
         return classifier
-
 
 
 class ApiClassifier:
